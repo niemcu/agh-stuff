@@ -8,34 +8,104 @@ struct pub {
     unsigned int clients;
 };
 
-pthread_mutex_t mutex;
+struct pub my_pub;
 
+pthread_mutex_t mug_mutex;
+pthread_mutex_t bar_mutex;
 //watek albo czeka na napelnienie, albo pije
+
+pthread_cond_t mugs_cond;
+
+void *visit_pub_cond(unsigned int *arg) {
+	unsigned int th_num = *arg;
+    int k;
+    printf("Moje ID %d; Wchodze do pubu\n", th_num);
+    for (k = 1; k < 3; k++) {
+    	printf("Moje ID %d; Chce pobrac kufel %d \n", th_num, k);
+		for (;;) {
+			pthread_mutex_lock(&mug_mutex);
+			while (my_pub.mugs == 0) {
+				pthread_cond_wait(&mugs_cond, &mug_mutex);
+				printf("Moje ID %d; Nie ma kufli, poczekam\n", th_num);
+			}
+			my_pub.mugs--;
+			printf("Moje ID %d; Mam kufel, ide do kranu\n", th_num);
+			pthread_mutex_unlock(&mug_mutex);
+			
+			pthread_mutex_lock(&bar_mutex);
+			printf("Moje ID %d; Mam kran, nalewam piwo\n", th_num);
+			sleep(1);
+			pthread_mutex_unlock(&bar_mutex);
+			// picie piwa
+			printf("Moje ID %d; Pije piwo\n", th_num);
+			sleep(6);
+			printf("Moje ID %d; Wypilem. oddaje kufel\n", th_num);
+			pthread_mutex_lock(&mug_mutex);
+			my_pub.mugs++;
+			pthread_cond_broadcast(&mugs_cond);
+			pthread_mutex_unlock(&mug_mutex);
+			break;
+		}
+	}
+	printf("Moje ID %d; Upilem sie. Wychodze z baru.\n", th_num);
+    return NULL;
+}
 
 void *visit_pub(unsigned int *arg) {
     unsigned int th_num = *arg;
+    int success = 0;
+    int k;
     printf("Moje ID %d; Wchodze do pubu\n", th_num);
-    pthread_mutex_lock(&mutex);
-    printf("Moje ID %d; Nalewajo mi\n", th_num);
-    sleep(3);
-    pthread_mutex_unlock(&mutex);
-    printf("Moje ID %d; Mam nalane. Pije\n", th_num);
-    sleep(8);
-    printf("Moje ID %d; Wypilem", th_num);
+    for (k = 1; k < 3; k++) {
+    	printf("Moje ID %d; Chce pobrac kufel %d \n", th_num, k);
+		for (;;) {
+			pthread_mutex_lock(&mug_mutex);
+			if (my_pub.mugs > 0) {
+				success = 1;
+				my_pub.mugs--;
+			}
+			pthread_mutex_unlock(&mug_mutex);
+			if (success == 1) {
+				success = 0;
+				printf("Moje ID %d; Mam kufel, czekam na kran\n", th_num);
+				pthread_mutex_lock(&bar_mutex);
+				printf("Moje ID %d; Mam kran, nalewam piwo\n", th_num);
+					sleep(3);
+				pthread_mutex_unlock(&bar_mutex);
+				// picie piwa
+				printf("Moje ID %d; Pije piwo\n", th_num);
+				sleep(10);
+				printf("Moje ID %d; Wypilem. oddaje kufel\n", th_num);
+				pthread_mutex_lock(&mug_mutex);
+				my_pub.mugs++;
+				pthread_mutex_unlock(&mug_mutex);
+				break;
+			} else {
+
+			}	
+		}
+	}
+	printf("Moje ID %d; Upilem sie. Wychodze z baru.\n", th_num);
     return NULL;
 }
 
 int main() {
-    struct pub my_pub = { 5, 7 };
+	int * tab_clients;
     unsigned int i;
+    printf("\nLiczba klientow: "); scanf("%d", &my_pub.clients);
+    printf("\nLiczba kufli: "); scanf("%d", &my_pub.mugs);
     pthread_t tid_vector[my_pub.clients];
-    pthread_mutex_init(&mutex, NULL);
+    pthread_mutex_init(&mug_mutex, NULL);
+    tab_clients = (int *) malloc(my_pub.clients*sizeof(int));
     for (i = 0; i < my_pub.clients; i++) {
-        pthread_create(&tid_vector[i], NULL, visit_pub, &i);
+    	tab_clients[i] = i;
+    }
+    for (i = 0; i < my_pub.clients; i++) {
+        pthread_create(&tid_vector[i], NULL, visit_pub_cond, &tab_clients[i]);
     }
     for (i = 0; i < my_pub.clients; i++) {
         pthread_join(tid_vector[i], NULL);
     }
-    pthread_mutex_destroy(&mutex);
+    pthread_mutex_destroy(&mug_mutex);
     return 0;
 }
