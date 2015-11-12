@@ -5,84 +5,101 @@
 
 #include"czytelnia.h"
 
-void *funkcja_czytelnika( void *);
-void *funkcja_pisarza( void *);
+void *reader_thread(void*);
+void *writer_thread(void*);
 
+int main(void) {
+    int readers_num = 10;
+    int writers_num = 5;
+    int i;
+    pthread_t writers[writers_num], readers[readers_num];
+    reading_room_t czytelnia;
 
-int main(){
-  
-  int i;
-  pthread_t pisarze[5], czytelnicy[10];
-  int indeksy[10] = {0,1,2,3,4,5,6,7,8,9}; 
-  czytelnia_t czytelnia;
-  
-  inicjuj(&czytelnia);
-    
-  for(i=0; i<5; i++){
-    pthread_create( &pisarze[i], NULL, funkcja_pisarza, (void *)&czytelnia );
-  }
-  for(i=0; i<10; i++){
-    pthread_create( &czytelnicy[i], NULL, funkcja_czytelnika, (void *)&czytelnia );
-  }
-  for(i=0; i<5; i++){
-    pthread_join( pisarze[i], NULL); 
-  }
-  for(i=0; i<10; i++){
-    pthread_join( czytelnicy[i], NULL ); 
-  }
-  
+    rr_init(&czytelnia);
+
+    for(i = 0; i < writers_num; i++) {
+        pthread_create(&writers[i], NULL, writer_thread, (void *)&czytelnia );
+    }
+
+    for(i = 0; i < readers_num; i++) {
+        pthread_create(&readers[i], NULL, reader_thread, (void *)&czytelnia );
+    }
+
+    for(i = 0; i < writers_num; i++) {
+        pthread_join(writers[i], NULL); 
+    }
+
+    for(i = 0; i<readers_num; i++) {
+        pthread_join(readers[i], NULL); 
+    }
 }
 
-void *funkcja_czytelnika( void * arg){
-  
-  czytelnia_t* czytelnia_p = (czytelnia_t *)arg;
-  
-  for(;;){
-    
-    usleep(rand()%10000000);
-    printf("czytelnik %d - przed zamkiem\n", pthread_self());
-    
-    my_read_lock_lock(czytelnia_p);
-    
-    // korzystanie z zasobow czytelni
-    printf("czytelnik %d - wchodze\n", pthread_self());
-    
-    czytam(czytelnia_p);
-    
-    
-    printf("czytelnik %d - wychodze\n", pthread_self());
-    
-    my_read_lock_unlock(czytelnia_p);
-    
-    printf("czytelnik %d - po zamku\n", pthread_self());
-    
-  }
-  
+void *reader_thread(void *arg) {
+    reading_room_t* rr = (reading_room_t*)arg;
+
+    for(;;) {
+        usleep(rand()%10000000);
+
+        printf("l.pis(%d) l.czyt(%d) | czytelnik %d - przed zamkiem\n", 
+                rr->writers_inside,
+                rr->readers_inside,
+                (int)pthread_self());
+
+        my_read_lock_lock(rr);
+
+        printf("l.pis(%d) l.czyt(%d) | czytelnik %d - wchodze\n", 
+                rr->writers_inside,
+                rr->readers_inside,
+                (int)pthread_self());   
+
+        rr_read(rr);
+
+        printf("l.pis(%d) l.czyt(%d) | czytelnik %d - wychodze\n", 
+                rr->writers_inside,
+                rr->readers_inside,
+                (int)pthread_self());  
+
+        my_read_lock_unlock(rr);
+
+        printf("l.pis(%d) l.czyt(%d) | czytelnik %d - po zamku\n", 
+                rr->writers_inside,
+                rr->readers_inside,
+                (int)pthread_self());  
+    }
 }
 
-void *funkcja_pisarza( void * arg){
-  
-  czytelnia_t* czytelnia_p = (czytelnia_t *)arg;
-  
-  for(;;){
-    
-    usleep(rand()%11000000);
-    printf("pisarz %d - przed zamkiem\n", pthread_self());
-    
-    my_write_lock_lock(czytelnia_p);
-    
-    // korzystanie z zasobow czytelni
-    printf("pisarz %d - wchodze\n", pthread_self());
-    
-    pisze(czytelnia_p);
-    
-    printf("pisarz %d - wychodze\n", pthread_self());
-    
-    my_write_lock_unlock(czytelnia_p);
-    
-    printf("pisarz %d - po zamku\n", pthread_self());
-  }
-  
-}
+void *writer_thread(void *arg){
+    reading_room_t* rr = (reading_room_t*)arg;
 
+    for(;;){
+
+        usleep(rand()%11000000);
+
+        printf("l.pis(%d) l.czyt(%d) | pisarz %d - przed zamkiem\n", 
+                rr->writers_inside,
+                rr->readers_inside,
+                (int)pthread_self());
+
+        my_write_lock_lock(rr);
+
+        printf("l.pis(%d) l.czyt(%d) | pisarz %d - wchodze\n", 
+                rr->writers_inside,
+                rr->readers_inside,
+                (int)pthread_self());   
+
+        rr_write(rr);
+
+        printf("l.pis(%d) l.czyt(%d) | pisarz %d - wychodze\n", 
+                rr->writers_inside,
+                rr->readers_inside,
+                (int)pthread_self());  
+
+        my_write_lock_unlock(rr);
+
+        printf("l.pis(%d) l.czyt(%d) | pisarz %d - po zamku\n", 
+                rr->writers_inside,
+                rr->readers_inside,
+                (int)pthread_self());  
+    }
+}
 

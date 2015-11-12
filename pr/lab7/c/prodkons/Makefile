@@ -1,7 +1,7 @@
 # prosty Makefile dla prostych programow
 
 # nazwa pliku z kodem wykonywalnym
-NAZWA = czyt_pis
+NAZWA = prod_cons
 
 # kompilator C
 CC = gcc
@@ -18,14 +18,14 @@ LIB = -L. -lm
 # katalogi z plikami naglowkowymi i wklejane pliki naglowkowe 
 INC = -I.
 
-czyt_pis: czyt_pis.o czytelnia.o
-	$(LD) $(LDFL) -o $(NAZWA) czyt_pis.o czytelnia.o $(LIB)
+prod_cons: prod_cons.o kolejka.o
+	$(LD) $(LDFL) -o $(NAZWA) prod_cons.o kolejka.o $(LIB)
 
-czyt_pis.o: czyt_pis.c czytelnia.h
-	$(CC) $(CFL) -c czyt_pis.c $(INC)
+prod_cons.o: prod_cons.c kolejka.h
+	$(CC) $(CFL) -c prod_cons.c $(INC)
 
-czytelnia.o: czytelnia.c
-	$(CC) $(CFL) -c czytelnia.c $(INC)
+kolejka.o: kolejka.c kolejka.h
+	$(CC) $(CFL) -c kolejka.c $(INC)
 
 clean:
 	rm *.o 
