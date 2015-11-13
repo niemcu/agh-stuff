@@ -1,0 +1,30 @@
+package czyt_pis_java;
+
+public class Czytelnik implements Runnable {
+
+	Czytelnia czytelnia;
+	int nr;
+	
+	Czytelnik(Czytelnia czytelnia, int nr){
+		this.czytelnia = czytelnia;
+		this.nr = nr;
+	}
+
+    public void run() {
+    	czytelnia.chceCzytac(this);
+    	czytam();
+    	czytelnia.koniecCzytania(this);
+    }
+
+	private void czytam() {
+		System.out.println("czytelnik" + this.nr + ": czytam");
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+}
+                
