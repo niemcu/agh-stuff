@@ -1,0 +1,90 @@
+package czyt_pis_java;
+
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+public class Czytelnia  {
+
+	int liczba_czytelnikow;
+	int liczba_pisarzy;
+	Condition czytelnicy;
+	Condition pisarze;
+	Lock lock = new ReentrantLock();
+	Queue<Czytelnik> kolejkaCzytelnikow; 
+	Queue<Pisarz> kolejkaPisarzy; 
+	
+	
+	
+	
+	public Czytelnia() {
+		super();
+		this.liczba_czytelnikow = 0;
+		this.liczba_pisarzy = 0;
+		this.czytelnicy = lock.newCondition();
+		this.pisarze = lock.newCondition();
+		this.kolejkaCzytelnikow = new LinkedList<Czytelnik>();
+		this.kolejkaPisarzy = new LinkedList<Pisarz>();
+	}
+
+	void chcePisac(Pisarz pisarz){
+		this.kolejkaPisarzy.add(pisarz);
+		if(liczba_czytelnikow+liczba_pisarzy>0){
+			try {
+				lock.lock();
+				pisarze.await();	
+				lock.unlock();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		liczba_pisarzy++;
+		
+	}
+	
+	void koniecPisania(){
+		lock.lock();
+		liczba_pisarzy--;
+		if(!kolejkaCzytelnikow.isEmpty())
+			czytelnicy.signal();
+		else
+			pisarze.signal();
+		this.kolejkaPisarzy.remove();
+		lock.unlock();
+	}
+	
+	void chceCzytac(Czytelnik czytelnik){
+		this.kolejkaCzytelnikow.add(czytelnik);
+		if(liczba_pisarzy>0 || !kolejkaPisarzy.isEmpty()){
+			try {
+				lock.lock();
+				System.out.println("czytelnik" + czytelnik.nr + ": chce czytac");
+				czytelnicy.await();	
+				lock.unlock();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		liczba_czytelnikow++;
+		
+	}
+	
+	void koniecCzytania(){
+		lock.lock();
+		liczba_czytelnikow--;
+		czytelnicy.signalAll();
+		this.kolejkaCzytelnikow.remove();
+		
+		if(kolejkaCzytelnikow.isEmpty())
+			pisarze.signal();
+		
+		lock.unlock();
+		
+	}
+	
+
+}

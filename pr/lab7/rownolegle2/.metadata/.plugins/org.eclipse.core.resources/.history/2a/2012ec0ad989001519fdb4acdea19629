@@ -1,0 +1,34 @@
+package czyt_pis_java;
+
+import java.util.List;
+import java.util.ArrayList;
+
+public class Test {
+    public static void main(String[] args) {
+    	Czytelnia czytelnia = new Czytelnia();
+   // 	Pisarz pisarz = new Pisarz(czytelnia);
+  //  	czytelnia.kolejkaPisarzy.add(pisarz);
+    	
+//    	czytelnia.liczba_pisarzy=1;
+    	
+   // 	List <Pisarz> pisarzList=new ArrayList<Pisarz>();
+    	
+    	for(int i=0; i<10; i++){	
+    		(new Thread(new Czytelnik(czytelnia, i))).start();
+    	}
+    	
+    	for(int i=0; i<5; i++){
+    		(new Thread(new Pisarz(czytelnia, i))).start();
+    	}
+    	
+    	try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
+
+ 
+    }
+}

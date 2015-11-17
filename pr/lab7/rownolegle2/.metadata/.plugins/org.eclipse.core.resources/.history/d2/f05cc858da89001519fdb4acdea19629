@@ -1,0 +1,22 @@
+package czyt_pis_java;
+
+import java.util.List;
+import java.util.ArrayList;
+
+public class Test {
+    public static void main(String[] args) {
+    	Czytelnia czytelnia = new Czytelnia();
+
+    	while(true) {
+    	
+	    	for(int i=0; i<5; i++){
+	    		(new Thread(new Pisarz(czytelnia, i))).start();
+	    	}
+	    	
+	    	for(int i=0; i<10; i++){	
+	    		(new Thread(new Czytelnik(czytelnia, i))).start();
+	    	}
+    	}
+ 
+    }
+}

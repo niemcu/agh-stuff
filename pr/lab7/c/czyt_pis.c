@@ -71,7 +71,7 @@ void *reader_thread(void *arg) {
 void *writer_thread(void *arg){
     reading_room_t* rr = (reading_room_t*)arg;
 
-    for(;;){
+    for(;;) {
 
         usleep(rand()%11000000);
 
