@@ -1,4 +1,5 @@
 #include "GlobalData.h"
+#include "FEMGrid.h"
 #include <iostream>
 
 using namespace std;
@@ -16,5 +17,8 @@ int main() {
     cout << data.modifier << endl;
 
     cout << "Hello, World!" << endl;
+
+    FEMGrid grid =;
+
     return 0;
 }
