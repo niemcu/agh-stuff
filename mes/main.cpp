@@ -7,13 +7,13 @@ int main() {
 
     GlobalData data;
 
-    data.loadFromFile("wejscie");
+    data.loadFromFile("/home/szympeg/Desktop/agh-stuff/mes/wejscie.txt");
 
     cout << data.elementsCount << endl;
     cout << data.nodesCount << endl;
     cout << data.length << endl;
     cout << data.surface << endl;
-    cout << data.k << endl;
+    cout << data.modifier << endl;
 
     cout << "Hello, World!" << endl;
     return 0;

@@ -1,23 +1,23 @@
 #include "GlobalData.h"
 #include <fstream>
 #include <string>
-
-using namespace std;
+#include <iostream>
 
 GlobalData::GlobalData() {};
 GlobalData::~GlobalData() {};
 
-bool GlobalData::loadFromFile(string path) {
-    ifstream f;
-    f.open(path);
+bool GlobalData::loadFromFile(std::string path) {
+    std::fstream f(path, std::ios_base::in);
 
-    f >> this->elementsCount >>
-            this->nodesCount >>
-            this->length >>
-            this->surface >>
-            this->k;
+    if (f.good()) {
+        std::cout << "plik otworzon";
+    } else {
+        std::cout << "jest chujnia jakas";
+    }
 
-    
+    f >> this->elementsCount >> this->nodesCount >> this->length >> this->surface >> this->modifier;
 
     f.close();
+
+    return 0;
 }

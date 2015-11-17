@@ -7,7 +7,7 @@ class GlobalData {
         int nodesCount;
         int length;
         int surface;
-        int k;
+        int modifier;
         
         GlobalData();
         ~GlobalData();
