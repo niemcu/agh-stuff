@@ -1,5 +1,4 @@
 #include<stdlib.h>
-//#include<stdio.h>
 #include<unistd.h>
 #include<pthread.h>
 
@@ -9,7 +8,6 @@
 
 int my_read_lock_lock(reading_room_t* rr) {
     if (&rr->writers_inside > 0 || &rr->writers_waiting > 0) {
-        // poczekajmy
         pthread_cond_wait(&rr->readers_cond, &rr->mutex);
     }
 
