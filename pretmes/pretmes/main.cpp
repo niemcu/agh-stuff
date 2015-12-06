@@ -2,11 +2,13 @@
 #include <vector>
 #include <fstream>
 
+#define HEAT 1
+#define CONV 2
 
 class Node {
     public:
         int nid;
-        int bc;
+        int bc; // 1 - strumien ciepla, 2 - konwekcja
 
         void addBC();
 };
@@ -40,11 +42,15 @@ public:
 class GlobalData {
 
     public:
-        int elementsCount;
-        int nodesCount;
-        double length;
-        double surface;
-        double modifier;
+        int elementsCount; // ilosc elementow skonczonych
+        int nodesCount; // ilosc wezlow
+        double length; // dlugosc preta
+        double surface; // powierzchnia przekroju poprzecznego
+        double modifier; // wspolczynnik przewodzenia ciepla
+
+        double alfa; // wspolczynnik wymiany ciepla przez konwekcje
+        double heat; // strumien ciepla q
+        double too; // temp. otoczenia tnieskonczonsc
 
         GlobalData();
         ~GlobalData();
@@ -76,8 +82,13 @@ public:
     void insertNodes();
     void setElements();
     void setBoundaryConditions();
+
     void setLocalStiffnessMatrices();
     void setLocalLoadVectors();
+
+    void setGlobalStiffnessMatrix();
+    void setGlobalLoadVector();
+
     void printGrid();
 };
 
@@ -102,7 +113,7 @@ bool GlobalData::loadFromFile(std::string path) {
         std::cout << "jest chujnia jakas";
     }
 
-    f >> this->elementsCount >> this->length >> this->surface >> this->modifier;
+    f >> this->elementsCount >> this->length >> this->surface >> this->modifier >> this->alfa >> this->heat >> this->too;
 
     f.close();
 
@@ -124,8 +135,10 @@ void FEMGrid::setBoundaryConditions() {
     for (int i = 0; i < data.nodesCount; i++) {
         if (i == 0) {
             // wstaw bc - strumien ciepla
+            this->nodes[i].bc = HEAT;
         } else if (i == data.nodesCount - 1) {
             // wstaw bc - konwekcja
+            this->nodes[i].bc = CONV;
         } else {
             this->nodes[i].bc = 0;
         }
@@ -154,10 +167,26 @@ void FEMGrid::setLocalStiffnessMatrices() {
         std::cout << "C:" << C << std::endl;
         this->elements[i].stiffnessMatrix[0][0] = this->elements[i].stiffnessMatrix[1][1] =  C;
         this->elements[i].stiffnessMatrix[0][1] = this->elements[i].stiffnessMatrix[1][0] = -C;
+
+        // warunki brzegowe
+        if (this->elements[i].nop1.bc == HEAT) {
+            // dodaj strumien do P
+        }
+        if (this->elements[i].nop2.bc == CONV) {
+            // dodaj konwekcje alfaS tu i do P
+        }
     }
 }
 
 void FEMGrid::setLocalLoadVectors() {
+
+}
+
+void FEMGrid::setGlobalStiffnessMatrix() {
+
+}
+
+void FEMGrid::setGlobalLoadVector() {
 
 }
 
@@ -186,6 +215,10 @@ int main()
     std::cout << data.length << std::endl;
     std::cout << data.surface << std::endl;
     std::cout << data.modifier << std::endl;
+    std::cout << data.alfa << std::endl;
+    std::cout << data.heat << std::endl;
+    std::cout << data.too << std::endl;
+
     std::cout << "Hello, World! eeehehe" << std::endl;
 
     // 2. wypelnij wektory nopami (elementy)
