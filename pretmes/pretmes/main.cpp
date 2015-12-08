@@ -28,6 +28,7 @@ public:
     //double loadVector[2][1];
     Element1D(double l, double s, double k) : length(l), surface(s), modifier(k) {
         stiffnessMatrix.resize(2, std::vector<double> (2, 0));
+        loadVector.resize(2, std::vector<double> (1, 0));
     }
     Element1D() {
         length = 0;
@@ -172,8 +173,10 @@ void FEMGrid::setLocalStiffnessMatrices() {
         if (this->elements[i].nop1.bc == HEAT) {
             // dodaj strumien do P
         }
+        std::cout << "bc: " << this->elements[i].nop2.bc << std::endl;
         if (this->elements[i].nop2.bc == CONV) {
             // dodaj konwekcje alfaS tu i do P
+            this->elements[i].stiffnessMatrix[1][1] += data.alfa * data.surface;
         }
     }
 }
@@ -227,12 +230,12 @@ int main()
 
     grid.insertNodes();
     std::cout << "Hello, World! eeehehe" << std::endl;
+    grid.setBoundaryConditions();
 
     grid.setElements();
     std::cout << "Hello, World! eeehehe" << std::endl;
 
     // 3. set boundary conditions
-    grid.setBoundaryConditions();
     std::cout << "Hello, World! eeehehe" << std::endl;
 
     // 4. wszystkie lokalne h i lokalne p
