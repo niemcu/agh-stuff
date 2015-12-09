@@ -2,15 +2,14 @@
 #include <vector>
 #include <fstream>
 
+#define NONE 0
 #define HEAT 1
 #define CONV 2
 
 class Node {
     public:
         int nid;
-        int bc; // 1 - strumien ciepla, 2 - konwekcja
-
-        void addBC();
+        int bc; // NONE, HEAT lub CONV
 };
 
 class Element1D {
@@ -24,8 +23,7 @@ public:
 
     std::vector < std::vector<double> > stiffnessMatrix;
     std::vector < std::vector<double> > loadVector;
-    //double stiffnessMatrix[2][2];
-    //double loadVector[2][1];
+
     Element1D(double l, double s, double k) : length(l), surface(s), modifier(k) {
         stiffnessMatrix.resize(2, std::vector<double> (2, 0));
         loadVector.resize(2, std::vector<double> (1, 0));
@@ -84,18 +82,12 @@ public:
     void setElements();
     void setBoundaryConditions();
 
-    void setLocalStiffnessMatrices();
-    void setLocalLoadVectors();
-
+    void setLocalStiffnessMatricesAndLoadVectors();
     void setGlobalStiffnessMatrix();
     void setGlobalLoadVector();
 
     void printGrid();
 };
-
-void Node::addBC() {
-
-}
 
 void Element1D::setNodes(Node n1, Node n2) {
     this->nop1 = n1;
@@ -124,7 +116,6 @@ bool GlobalData::loadFromFile(std::string path) {
 }
 
 void FEMGrid::insertNodes() {
-    // najpierw node'y
     for (int i = 0; i < data.nodesCount; i++) {
         Node newNode;
         newNode.nid = i;
@@ -135,13 +126,11 @@ void FEMGrid::insertNodes() {
 void FEMGrid::setBoundaryConditions() {
     for (int i = 0; i < data.nodesCount; i++) {
         if (i == 0) {
-            // wstaw bc - strumien ciepla
             this->nodes[i].bc = HEAT;
         } else if (i == data.nodesCount - 1) {
-            // wstaw bc - konwekcja
             this->nodes[i].bc = CONV;
         } else {
-            this->nodes[i].bc = 0;
+            this->nodes[i].bc = NONE;
         }
     }
 }
@@ -157,7 +146,7 @@ void FEMGrid::setElements() {
     }
 }
 
-void FEMGrid::setLocalStiffnessMatrices() {
+void FEMGrid::setLocalStiffnessMatricesAndLoadVectors() {
     // macierz H lokalna wyglada tak ze liczymy c
     double C;
     for (int i = 0; i < data.elementsCount; i++) {
@@ -172,25 +161,23 @@ void FEMGrid::setLocalStiffnessMatrices() {
         // warunki brzegowe
         if (this->elements[i].nop1.bc == HEAT) {
             // dodaj strumien do P
+            this->elements[i].loadVector[0][0] += data.heat * data.surface;
         }
         std::cout << "bc: " << this->elements[i].nop2.bc << std::endl;
         if (this->elements[i].nop2.bc == CONV) {
             // dodaj konwekcje alfaS tu i do P
             this->elements[i].stiffnessMatrix[1][1] += data.alfa * data.surface;
+            this->elements[i].loadVector[1][0] -= data.alfa * data.surface * data.too;
         }
     }
 }
 
-void FEMGrid::setLocalLoadVectors() {
-
-}
-
 void FEMGrid::setGlobalStiffnessMatrix() {
-
+    // petla po lokalnych
 }
 
 void FEMGrid::setGlobalLoadVector() {
-
+    // petla po lokalnych
 }
 
 void FEMGrid::printGrid() {
@@ -203,6 +190,13 @@ void FEMGrid::printGrid() {
             }
             std::cout << std::endl;
         }
+        std::cout << "LoadVector dla elementu " << i+1 << std::endl;
+        for (int j = 0; j < 2; j++) {
+            for (int z = 0; z < 1; z++) {
+                std::cout << e.loadVector[j][z];
+            }
+            std::cout << std::endl;
+        }
     }
 }
 
@@ -211,41 +205,36 @@ int main()
     // 1. czytamy z pliku GlobalData
     GlobalData data;
 
-    data.loadFromFile("/home/szympeg/Desktop/agh-stuff/mes/wejscie.txt");
+    data.loadFromFile("/home/niemcu/agh-stuff/mes/wejscie.txt");
 
-    std::cout << data.elementsCount << std::endl;
-    std::cout << data.nodesCount << std::endl;
-    std::cout << data.length << std::endl;
-    std::cout << data.surface << std::endl;
-    std::cout << data.modifier << std::endl;
-    std::cout << data.alfa << std::endl;
-    std::cout << data.heat << std::endl;
-    std::cout << data.too << std::endl;
-
-    std::cout << "Hello, World! eeehehe" << std::endl;
+//    std::cout << data.elementsCount << std::endl;
+//    std::cout << data.nodesCount << std::endl;
+//    std::cout << data.length << std::endl;
+//    std::cout << data.surface << std::endl;
+//    std::cout << data.modifier << std::endl;
+//    std::cout << data.alfa << std::endl;
+//    std::cout << data.heat << std::endl;
+//    std::cout << data.too << std::endl;
 
     // 2. wypelnij wektory nopami (elementy)
     FEMGrid grid(data);
-    std::cout << "Hello, World! eeehehe" << std::endl;
 
     grid.insertNodes();
-    std::cout << "Hello, World! eeehehe" << std::endl;
+
     grid.setBoundaryConditions();
 
     grid.setElements();
-    std::cout << "Hello, World! eeehehe" << std::endl;
 
     // 3. set boundary conditions
     std::cout << "Hello, World! eeehehe" << std::endl;
 
     // 4. wszystkie lokalne h i lokalne p
-    grid.setLocalStiffnessMatrices();
+    grid.setLocalStiffnessMatricesAndLoadVectors();
     std::cout << "Hello, World! eeehehe" << std::endl;
 
     grid.printGrid();
     std::cout << "Hello, World! eeehehe" << std::endl;
 
-    grid.setLocalLoadVectors();
     // 5. globalne h i p
     // 6. gauss uklad rownan
     // 7. wypisz wynik
