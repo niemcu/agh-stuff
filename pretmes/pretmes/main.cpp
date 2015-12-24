@@ -28,19 +28,58 @@ public:
         stiffnessMatrix.resize(2, std::vector<double> (2, 0));
         loadVector.resize(2, std::vector<double> (1, 0));
     }
-    Element1D() {
-        length = 0;
-        surface = 0;
-        modifier = 0;
-    }
+    Element1D() : length(0), surface(0), modifier(0) {}
     ~Element1D() {}
 
     void setNodes(Node n1, Node n2);
 };
 
-class GlobalData {
 
-    public:
+class SystemOfEquations {
+public:
+    std::vector < std::vector<double> > globalMatrix;
+    int rowsCount;
+
+    SystemOfEquations(std::vector<Element1D> elements, int count) {
+
+        rowsCount = count + 1;
+
+        globalMatrix.resize(rowsCount, std::vector<double> (rowsCount + 1, 0));
+
+        for (int i = 0; i < count; i++) {
+            Element1D e = elements[i];
+
+            globalMatrix[i][i]     += e.stiffnessMatrix[0][0];
+            globalMatrix[i][i+1]   += e.stiffnessMatrix[0][1];
+            globalMatrix[i+1][i]   += e.stiffnessMatrix[1][0];
+            globalMatrix[i+1][i+1] += e.stiffnessMatrix[1][1];
+
+            globalMatrix[i][count+1]   += e.loadVector[0][0];
+            globalMatrix[i+1][count+1] += e.loadVector[1][0];
+
+        }
+    }
+    ~SystemOfEquations() {}
+
+    void printGlobals();
+    std::vector<double> solve();
+};
+
+void SystemOfEquations::printGlobals() {
+    std::cout << "Wszystko: " << std::endl;
+    for (int i = 0; i < rowsCount; i++) {
+        std::cout << "[ ";
+        for (int j = 0; j < rowsCount + 1; j++) {
+                std::cout << globalMatrix[i][j] << " ";
+        }
+        std::cout << " ] ";
+        std::cout << std::endl;
+    }
+}
+
+
+class GlobalData {
+public:
         int elementsCount; // ilosc elementow skonczonych
         int nodesCount; // ilosc wezlow
         double length; // dlugosc preta
@@ -83,10 +122,9 @@ public:
     void setBoundaryConditions();
 
     void setLocalStiffnessMatricesAndLoadVectors();
-    void setGlobalStiffnessMatrix();
-    void setGlobalLoadVector();
 
     void printGrid();
+    std::vector<Element1D> getElements();
 };
 
 void Element1D::setNodes(Node n1, Node n2) {
@@ -115,6 +153,11 @@ bool GlobalData::loadFromFile(std::string path) {
     return 0;
 }
 
+std::vector<Element1D> FEMGrid::getElements() {
+    return this->elements;
+}
+
+
 void FEMGrid::insertNodes() {
     for (int i = 0; i < data.nodesCount; i++) {
         Node newNode;
@@ -134,6 +177,51 @@ void FEMGrid::setBoundaryConditions() {
         }
     }
 }
+
+//void SystemOfEquations::solve() {
+//    int n = A.size();
+
+//    for (int i=0; i<n; i++) {
+//        // Search for maximum in this column
+//        double maxEl = abs(A[i][i]);
+//        int maxRow = i;
+//        for (int k=i+1; k<n; k++) {
+//            if (abs(A[k][i]) > maxEl) {
+//                maxEl = abs(A[k][i]);
+//                maxRow = k;
+//            }
+//        }
+
+//        // Swap maximum row with current row (column by column)
+//        for (int k=i; k<n+1;k++) {
+//            double tmp = A[maxRow][k];
+//            A[maxRow][k] = A[i][k];
+//            A[i][k] = tmp;
+//        }
+
+//        // Make all rows below this one 0 in current column
+//        for (int k=i+1; k<n; k++) {
+//            double c = -A[k][i]/A[i][i];
+//            for (int j=i; j<n+1; j++) {
+//                if (i==j) {
+//                    A[k][j] = 0;
+//                } else {
+//                    A[k][j] += c * A[i][j];
+//                }
+//            }
+//        }
+//    }
+
+//    // Solve equation Ax=b for an upper triangular matrix A
+//    vector<double> x(n);
+//    for (int i=n-1; i>=0; i--) {
+//        x[i] = A[i][n]/A[i][i];
+//        for (int k=i-1;k>=0; k--) {
+//            A[k][n] -= A[k][i] * x[i];
+//        }
+//    }
+//    return x;
+//}
 
 void FEMGrid::setElements() {
     for (int i = 0; i < data.elementsCount; i++) {
@@ -172,14 +260,6 @@ void FEMGrid::setLocalStiffnessMatricesAndLoadVectors() {
     }
 }
 
-void FEMGrid::setGlobalStiffnessMatrix() {
-    // petla po lokalnych
-}
-
-void FEMGrid::setGlobalLoadVector() {
-    // petla po lokalnych
-}
-
 void FEMGrid::printGrid() {
     for (int i = 0; i < data.elementsCount; i++) {
         std::cout << "Macierz dla elementu " << i+1 << std::endl;
@@ -205,7 +285,7 @@ int main()
     // 1. czytamy z pliku GlobalData
     GlobalData data;
 
-    data.loadFromFile("/home/niemcu/agh-stuff/mes/wejscie.txt");
+    data.loadFromFile("/home/niemcu/agh-stuff/pretmes/pretmes/wejscie.txt");
 
 //    std::cout << data.elementsCount << std::endl;
 //    std::cout << data.nodesCount << std::endl;
@@ -236,7 +316,13 @@ int main()
     std::cout << "Hello, World! eeehehe" << std::endl;
 
     // 5. globalne h i p
+
+    SystemOfEquations sys(grid.getElements(), data.elementsCount);
+
     // 6. gauss uklad rownan
+    sys.printGlobals();
+    //sys.solve();
+
     // 7. wypisz wynik
 
     std::cout << "Hello, World! eeehehe" << std::endl;
