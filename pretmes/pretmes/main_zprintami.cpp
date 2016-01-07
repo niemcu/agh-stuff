@@ -22,7 +22,7 @@ public:
         GlobalData() {}
         ~GlobalData() {}
 
-        void loadFromFile(std::string path);
+        bool loadFromFile(std::string path);
 };
 
 class Node {
@@ -68,11 +68,13 @@ public:
     ~FEMGrid() {}
 
     void insertNodes();
-    std::vector<Element1D> getElements();
     void setElements();
-
     void setBoundaryConditions();
+
     void setLocalStiffnessMatricesAndLoadVectors();
+
+    void printGrid();
+    std::vector<Element1D> getElements();
 };
 
 class SystemOfEquations {
@@ -94,23 +96,21 @@ public:
             globalMatrix[i+1][i]   += e.stiffnessMatrix[1][0];
             globalMatrix[i+1][i+1] += e.stiffnessMatrix[1][1];
 
-            globalMatrix[i][count+1]   -= e.loadVector[0][0];
-            globalMatrix[i+1][count+1] -= e.loadVector[1][0];
+            globalMatrix[i][count+1]   += e.loadVector[0][0];
+            globalMatrix[i+1][count+1] += e.loadVector[1][0];
 
         }
     }
     ~SystemOfEquations() {}
 
-    std::vector<double> solveGauss();
+    void printGlobals();
+    std::vector<double> solve();
 };
 
 int main()
 {
-    std::cout << "PRETMES.cpp: Program wyznacza pole temperatury w precie dla jednowymiarowego, ustalonego przeplywu ciepla." << std::endl;
-    std::cout << "--------------------" << std::endl;
     GlobalData data;
-    // plik musi byc w tym samym folderze co binarka
-    data.loadFromFile("wejscie.txt");
+    data.loadFromFile("/home/niemcu/agh-stuff/pretmes/pretmes/wejscie.txt");
 
     FEMGrid grid(data);
     grid.insertNodes();
@@ -121,26 +121,13 @@ int main()
     SystemOfEquations sys(grid.getElements(), data.elementsCount);
 
     std::vector<double> result;
-    result = sys.solveGauss();
+    
+    sys.printGlobals();
 
-    std::cout << "Wprowadzone dane: " << std::endl;
-    std::cout << "- Ilosc elementow: " << data.elementsCount << std::endl;
-    std::cout << "- Ilosc wezlow: " << data.nodesCount << std::endl;
-    std::cout << "- Dlugosc preta [m]: " << data.length << std::endl;
-    std::cout << "- Powierzchnia przekroju [m2]: " << data.surface << std::endl;
-    std::cout << "- Wsp. przewodzenia ciepla [W/mK]: " << data.modifier << std::endl;
-    std::cout << "- Wsp. konwekcyjnej wym. ciepla [W/m2K]: " << data.alfa << std::endl;
-    std::cout << "- Gestosc strumienia ciepla [W/m2]: " << data.heat << std::endl;
-    std::cout << "- Temp. otoczenia [K]: " << data.too << std::endl;
+    result = sys.solve();
 
-    std::cout << "Rozwiazanie - temperatury dla kolejnych wezlow: [K]" << std::endl;
-    for (int i = 0, max = result.size(); i < max; i++) {
-        std::cout << result[i];
-        if (i != max - 1) {
-            std::cout << " -> ";
-        } else {
-            std::cout << std::endl;
-        }
+    for (int i = 0; i < result.size(); i++) {
+        std::cout << result[i] << "__";
     }
 
     return 0;
@@ -151,19 +138,22 @@ void Element1D::setNodes(Node n1, Node n2) {
     this->nop2 = n2;
 }
 
-void GlobalData::loadFromFile(std::string path) {
+bool GlobalData::loadFromFile(std::string path) {
     std::fstream f(path.c_str(), std::ios_base::in);
 
-    std::cout << "Pobieram dane wejsciowe do zadania z pliku: " << path << std::endl;
-
-    if (!f.good()) {
-        std::cout << "UWAGA! Nie udalo sie otworzyc pliku wejsciowego. ";
+    if (f.good()) {
+        std::cout << "plik otworzon";
+    } else {
+        std::cout << "jest chujnia jakas";
     }
 
     f >> this->elementsCount >> this->length >> this->surface >> this->modifier >> this->alfa >> this->heat >> this->too;
+
     f.close();
 
     this->nodesCount = this->elementsCount + 1;
+
+    return 0;
 }
 
 std::vector<Element1D> FEMGrid::getElements() {
@@ -187,6 +177,50 @@ void FEMGrid::setBoundaryConditions() {
             this->nodes[i].bc = NONE;
         }
     }
+}
+
+std::vector<double> SystemOfEquations::solve() {
+
+    for (int i = 0; i < rowsCount; i++) {
+        // Search for maximum in this column
+        double maxEl = std::abs(globalMatrix[i][i]);
+        int maxRow = i;
+        for (int k = i + 1; k < rowsCount; k++) {
+            if (std::abs(globalMatrix[k][i]) > maxEl) {
+                maxEl = std::abs(globalMatrix[k][i]);
+                maxRow = k;
+            }
+        }
+
+        // Swap maximum row with current row (column by column)
+        for (int k = i; k < rowsCount + 1; k++) {
+            double tmp = globalMatrix[maxRow][k];
+            globalMatrix[maxRow][k] = globalMatrix[i][k];
+            globalMatrix[i][k] = tmp;
+        }
+
+        // Make all rows below this one 0 in current column
+        for (int k = i + 1; k < rowsCount; k++) {
+            double c = -globalMatrix[k][i] / globalMatrix[i][i];
+            for (int j = i; j < rowsCount + 1; j++) {
+                if (i == j) {
+                    globalMatrix[k][j] = 0;
+                } else {
+                    globalMatrix[k][j] += c * globalMatrix[i][j];
+                }
+            }
+        }
+    }
+
+    // Solve equation Ax=b for an upper triangular matrix A
+    std::vector<double> x(rowsCount);
+    for (int i = rowsCount - 1; i >= 0; i--) {
+        x[i] = globalMatrix[i][rowsCount] / globalMatrix[i][i];
+        for (int k = i-1; k >= 0; k--) {
+            globalMatrix[k][rowsCount] -= globalMatrix[k][i] * x[i];
+        }
+    }
+    return x;
 }
 
 void FEMGrid::setElements() {
@@ -216,40 +250,47 @@ void FEMGrid::setLocalStiffnessMatricesAndLoadVectors() {
     }
 }
 
-std::vector<double> SystemOfEquations::solveGauss() {
+
+
+
+
+
+
+
+
+
+
+
+
+void FEMGrid::printGrid() {
+    for (int i = 0; i < data.elementsCount; i++) {
+        std::cout << "Macierz dla elementu " << i+1 << std::endl;
+        Element1D e = this->elements[i];
+        for (int j = 0; j < 2; j++) {
+            for (int z = 0; z < 2; z++) {
+                std::cout << e.stiffnessMatrix[j][z];
+            }
+            std::cout << std::endl;
+        }
+        std::cout << "LoadVector dla elementu " << i+1 << std::endl;
+        for (int j = 0; j < 2; j++) {
+            for (int z = 0; z < 1; z++) {
+                std::cout << e.loadVector[j][z];
+            }
+            std::cout << std::endl;
+        }
+    }
+}
+
+
+void SystemOfEquations::printGlobals() {
+    std::cout << "Wszystko: " << std::endl;
     for (int i = 0; i < rowsCount; i++) {
-        double maxEl = std::abs(globalMatrix[i][i]);
-        int maxRow = i;
-        for (int k = i + 1; k < rowsCount; k++) {
-            if (std::abs(globalMatrix[k][i]) > maxEl) {
-                maxEl = std::abs(globalMatrix[k][i]);
-                maxRow = k;
-            }
+        std::cout << "[ ";
+        for (int j = 0; j < rowsCount + 1; j++) {
+                std::cout << globalMatrix[i][j] << " ";
         }
-        for (int k = i; k < rowsCount + 1; k++) {
-            double tmp = globalMatrix[maxRow][k];
-            globalMatrix[maxRow][k] = globalMatrix[i][k];
-            globalMatrix[i][k] = tmp;
-        }
-        for (int k = i + 1; k < rowsCount; k++) {
-            double c = -globalMatrix[k][i] / globalMatrix[i][i];
-            for (int j = i; j < rowsCount + 1; j++) {
-                if (i == j) {
-                    globalMatrix[k][j] = 0;
-                } else {
-                    globalMatrix[k][j] += c * globalMatrix[i][j];
-                }
-            }
-        }
+        std::cout << " ] ";
+        std::cout << std::endl;
     }
-
-    std::vector<double> result(rowsCount);
-    for (int i = rowsCount - 1; i >= 0; i--) {
-        result[i] = globalMatrix[i][rowsCount] / globalMatrix[i][i];
-        for (int k = i-1; k >= 0; k--) {
-            globalMatrix[k][rowsCount] -= globalMatrix[k][i] * result[i];
-        }
-    }
-
-    return result;
 }
