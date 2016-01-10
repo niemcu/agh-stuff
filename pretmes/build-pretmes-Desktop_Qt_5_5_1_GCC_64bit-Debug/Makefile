@@ -48,8 +48,10 @@ OBJECTS_DIR   = ./
 
 ####### Files
 
-SOURCES       = ../pretmes/main.cpp 
-OBJECTS       = main.o
+SOURCES       = ../pretmes/main.cpp \
+		../pretmes/salon.cpp 
+OBJECTS       = main.o \
+		salon.o
 DIST          = /opt/Qt/5.5/gcc_64/mkspecs/features/spec_pre.prf \
 		/opt/Qt/5.5/gcc_64/mkspecs/common/unix.conf \
 		/opt/Qt/5.5/gcc_64/mkspecs/common/linux.conf \
@@ -178,7 +180,8 @@ DIST          = /opt/Qt/5.5/gcc_64/mkspecs/features/spec_pre.prf \
 		/opt/Qt/5.5/gcc_64/mkspecs/features/exceptions.prf \
 		/opt/Qt/5.5/gcc_64/mkspecs/features/yacc.prf \
 		/opt/Qt/5.5/gcc_64/mkspecs/features/lex.prf \
-		../pretmes/pretmes.pro  ../pretmes/main.cpp
+		../pretmes/pretmes.pro  ../pretmes/main.cpp \
+		../pretmes/salon.cpp
 QMAKE_TARGET  = pretmes
 DESTDIR       = #avoid trailing-slash linebreak
 TARGET        = pretmes
@@ -510,6 +513,9 @@ compiler_clean:
 
 main.o: ../pretmes/main.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o ../pretmes/main.cpp
+
+salon.o: ../pretmes/salon.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o salon.o ../pretmes/salon.cpp
 
 ####### Install
 
