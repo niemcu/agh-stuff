@@ -1,0 +1,77 @@
+# plik wsadowy dla programu "gnuplot"
+# (www.gnuplot.info, www.ucc.ie/gnuplot/gnuplot.html, 'man gnuplot')
+# (pomoc takze przez wywolanie 'gnuplot' i nastepnie 'help')
+#
+#
+# ustalenie wyjscia (terminala) jako okienka systemu XWindows
+#
+set terminal X11
+#
+# tytul
+#
+set title "Tytul mojego obrazka"
+#
+# opis osi x
+#
+set xlabel "co oznaczaja wartosci na osi x"
+#
+# opis osi x
+#
+set ylabel "co oznaczaja wartosci na osi x"
+#
+# ustalenie skali logarytmicznej dla osi x i y
+#
+set logscale y
+set logscale x
+#
+# ustalenie stylu uzywanych linii 
+# (linespoints - linie z zaznaczonymi punktami)
+#
+set data style linespoints
+#
+# ustalenie miejsc pojawiania sie znaczkow na osiach
+#
+set mxtics 10
+set mytics 10
+#
+# ustalenie wygladu siatki pojawiajacej sie na wykresie
+# 
+set grid mxtics mytics xtics ytics
+#
+# ustalenie miejsca pojawienia sie legendy
+#
+set key top left
+#
+# i w koncu rysowanie
+#
+plot[100:100000][2e-2:2000] \
+"plik_danych" index 0 using 2:3 title "opis_krzywej_1" linetype 2, \
+"plik_danych" index 1 using 2:3 title "opis_krzywej_2" linetype 4, \
+0.0004*x title "krzywa_analityczna" with lines linetype 1 
+#
+# [:] - zakres zmiennej (x i y)
+# numer sekcji w pliku "plik_danych"
+# using : - kolumny uzyte dla okreslenia wspolrzednych x i y punktow
+# title - opis konkretnej linii
+# linetype - typ linii (inne opcje rysowania mozliwe)
+# 0.0004*x - funkcja do wykreslenia (za pomoca linii - with lines)
+#
+
+#
+# a teraz tworzenie obrazka PostScriptowego
+#
+# ustalenie nazwy pliku wyjsciowego
+#
+set output "obrazek.eps"
+#
+# ustalenie wyjscia (terminala) jako obrazka PostScript'owego
+#
+set terminal postscript eps
+#
+# teraz nalezy powtorzyc komende rysowania (najlepiej wykorzystujac
+# mozliwosci edycji polecen)
+#
+plot[100:100000][2e-2:2000] \
+"plik_danych" index 0 using 2:3 title "opis_krzywej_1" linetype 2, \
+"plik_danych" index 1 using 2:3 title "opis_krzywej_2" linetype 4, \
+0.0004*x title "krzywa_analityczna" with lines linetype 1
