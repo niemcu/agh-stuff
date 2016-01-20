@@ -3,10 +3,6 @@
 #include <fstream>
 #include <cmath>
 
-#define NONE 0
-#define HEAT 1
-#define CONV 2
-
 // co to są funktory i traity sie dowiedz
 
 //class InputData {
@@ -24,12 +20,12 @@ public:
 
         double radius_min;
         double radius_max;
-        double convection_modifier;
+        double alfa;
         double temp_start;
         double temp_air;
-        double specific_heat;
-        double conduction_modifier;
-        double density;
+        double c;
+        double lambda;
+        double ro;
         double time_max;
 
         GlobalData() {}
@@ -42,7 +38,7 @@ class Node {
     public:
         double coord;
 
-        int bc; // NONE, HEAT lub CONV
+        //int bc; // NONE, HEAT lub CONV
         double temp;
 };
 
@@ -51,18 +47,13 @@ public:
     Node nop1;
     Node nop2;
 
-    double length;
-    double surface;
-    double modifier;
+    std::vector < std::vector<double> > mat;
+    std::vector < std::vector<double> > vec;
 
-    std::vector < std::vector<double> > stiffnessMatrix;
-    std::vector < std::vector<double> > loadVector;
-
-    Element1D(double l, double s, double k) : length(l), surface(s), modifier(k) {
-        stiffnessMatrix.resize(2, std::vector<double> (2, 0));
-        loadVector.resize(2, std::vector<double> (1, 0));
+    Element1D() {
+        mat.resize(2, std::vector<double> (2, 0));
+        vec.resize(2, std::vector<double> (1, 0));
     }
-    Element1D() : length(0), surface(0), modifier(0) {}
     ~Element1D() {}
 
     void setNodes(Node n1, Node n2);
@@ -78,90 +69,162 @@ public:
         gd = data;
         nodes.resize(gd.nodes_count);
         elements.resize(gd.elements_count);
-        // zalozenia: kazdy element ma taka sama dlugosc, w kazdym el. takie samo k oraz S
-        elemLength = data.length / data.elementsCount;
-
-        double a_modifier = gd.convection_modifier / (gd.specific_heat * gd.density);
-
-        // wagi ptk calkowania sa 1
-
-        double int_point1, int_point2;
-
-        int_point1 = int_point2 = 0.5773502692;
-
-        double N1_1, N1_2, N2_1, N2_2;
-
-        N1_1 = 0.5 * (1 - int_point1);
-        N1_2 = 0.5 * (1 - int_point2);
-
-        N2_1 = 0.5 * (1 + int_point1);
-        N2_2 = 0.5 * (1 + int_point2);
-
-        double elem_length = (gd.radius_max - gd.radius_min) / gd.elements_count;
-
-        double time_step = ( elem_length * elem_length ) / ( 0.5 * a_modifier);
-
-        // jakies zamieszanie z taumax
-
-        double x = 0;
-
-        // petla po wezlach ktora wpisze wspolrzedne oraz temp. poczatkowe do wezlow
-        for (int i = 0; i < gd.nodes_count; i++) {
-            nodes[i].temp = gd.temp_start;
-            nodes[i].coord = x;
-            x += elem_length;
-        }
-
-        // petla po czasie
-        for (;;) {
-            // zerowanie macierzy lokalnych i globalnych
-            resetMatrices();
-
-            // petla po elementach
-            for (j = 0; j < gd.elements_count; j++) {
-                double r1, r2;
-                r1 = nodes[j].coord;
-                r2 = nodes[j+1].coord;
-
-                //tempTau jest iles rowne
-
-                // petla po punktach calkowania
-                for (int k = 0; k < gd.integration_points_count; k++) {
-                    double int_coord = ;
-
-                    // obliczanie macierzy lokalnej
-                    C = (this->elements[i].modifier * this->elements[i].surface) / this->elements[i].length;
-
-                    this->elements[i].stiffnessMatrix[0][0] +=
-
-
-                            this->elements[i].stiffnessMatrix[1][1] =  C;
-                    this->elements[i].stiffnessMatrix[0][1] = this->elements[i].stiffnessMatrix[1][0] = -C;
-                }
-            }
-        }
     }
     ~FEMGrid() {}
 
+    void calculate();
     void resetMatrices();
-
-    void insertNodes();
-    void setElements();
-    void setBoundaryConditions();
-
-    void setLocalStiffnessMatricesAndLoadVectors();
-
     void printGrid();
     std::vector<Element1D> getElements();
 };
 
+void FEMGrid::calculate() {
+
+    double a_modifier = gd.lambda / (gd.c * gd.ro);
+
+    // wagi ptk calkowania sa 1
+
+    double int_point1, int_point2;
+
+    int_point1 = -0.5773502692; //ty kurwa gnoju zgnijesz w piekle za to
+    int_point2 = int_point1 * (-1);
+
+    double N1[2], N2[2];
+
+    N1[0] = 0.5 * (1 - int_point1);
+    N1[1] = 0.5 * (1 - int_point2);
+
+    N2[0] = 0.5 * (1 + int_point1);
+    N2[1] = 0.5 * (1 + int_point2);
+
+    double dr = (gd.radius_max - gd.radius_min) / gd.elements_count;
+
+    double time_step = ( dr * dr ) / ( 0.5 * a_modifier);
+    //std::cout << "krewa" << std::endl;
+
+    //tauMax = tau1 + tau2 wtf
+    double n_time = (gd.time_max / time_step); // + 1 ????
+    time_step = gd.time_max / n_time;
+
+    time_step = 50;
+
+    // jakies zamieszanie z taumax
+
+    double x = 0;
+
+    // petla po wezlach ktora wpisze wspolrzedne oraz temp. poczatkowe do wezlow
+    for (int i = 0; i < gd.nodes_count; i++) {
+        nodes[i].temp = gd.temp_start;
+        nodes[i].coord = x;
+        x += dr;
+    }
+    //std::cout << "krewa2" << std::endl;
+
+//        d_tmax = 0;
+//        tau = 0;
+
+
+
+    double temp_tau[2];
+
+    // petla po czasie
+    for (int i = 0; i < n_time; i++) { // albo o time_step ???>
+
+        // zerowanko macierzy globalnej kURWA
+
+        //std::cout << "czas iter" << i << std::endl;
+        // petla po elementach
+        for (int j = 0; j < gd.elements_count; j++) {
+            //std::cout << "elem" << std::endl;
+            double r1, r2;
+            r1 = nodes[j].coord;
+            r2 = nodes[j+1].coord;
+
+            temp_tau[0] = nodes[j].temp;
+            temp_tau[1] = nodes[j+1].temp;
+
+            double dr = r2 - r1;
+
+            double alfa = 0;
+            if (j == gd.elements_count - 1) {
+                alfa = gd.alfa;
+            }
+            // zerowanie macierzy lokalnych
+            //std::cout << "reset" << std::endl;
+            resetMatrices();
+            //std::cout << "po resecie" << std::endl;
+
+            // petla po punktach calkowania
+            for (int k = 0; k < gd.integration_points_count; k++) {
+                double rp = (N1[k] * r1) + (N2[k] * r2);
+                double tp_tau = N1[k] * temp_tau[0] + N2[k] * temp_tau[1];
+
+//                std::cout << << "asde/n" <gd.lambda << std::endl
+//                          << rp << std::endl
+//                          << dr << std::endl
+//                          << gd.c << std::endl
+//                          << gd.ro<< std::endl
+//                          << N1[k] << std::endl
+//                          << time_step;
+                //std::cout << "nienawidze cie" << ((gd.lambda * rp * 1) / (dr)) << std::endl;
+                // obliczanie macierzy lokalnej
+                this->elements[j].mat[0][0]
+                        += ((gd.lambda * rp * 1) / (dr))
+                         + gd.c * gd.ro * dr * rp * 1 * std::pow(N1[k], 2) / time_step;
+
+                this->elements[j].mat[0][1]
+                        += ((gd.lambda * rp * 1) / (dr))*(-1)
+                         + (gd.c * gd.ro * dr * rp * 1 * N1[k] * N2[k]) / (time_step);
+
+                this->elements[j].mat[1][0] = this->elements[j].mat[0][1];
+
+                this->elements[j].mat[1][1]
+                        += ((gd.lambda * rp * 1) / (dr))
+                         + (gd.c * gd.ro * dr * rp * 1 * std::pow(N2[k], 2)) / (time_step)
+                         + (2 * alfa * gd.radius_max); // ostatni czynnik jest zerem jak nie ma konwekcji
+
+                // lokalny wektor.
+
+                this->elements[j].vec[0][0] += (gd.c * gd.ro * dr * tp_tau * rp * 1 * N1[k]) / (time_step);
+
+                this->elements[j].vec[1][0]
+                        += (gd.c * gd.ro * dr * tp_tau * rp * 1 * N2[k]) / (time_step)
+                         + (2 * alfa * gd.radius_max * gd.temp_air);
+            } // koniec petli po punktach calkowania
+            //if (i == 1) printGrid();
+
+            // konstrukcja macierzy globalnej
+            // niech kazdy element znajdzie swoje miejsce w macierzy globalnej
+
+            SystemOfEquations sys(grid.getElements(), data.elementsCount);
+
+        } // koniec petli po elementach skonczonych
+        // rozwiaz uklad rownan w celu uzyskania nowych temperatur chwilowych
+        std::vector<double> result;
+        result = sys.solve();
+        // przepisanie nowych wartosci temperatur do kazdego wezla
+        for (int q = 0; q < result.size(); q++) {
+            nodes[q].temp = result[q];
+        }
+        // i zabawa zaczyna sie od poczatku
+    } // koniec petli po krokach czasowych
+}
+
 void FEMGrid::resetMatrices() {
-    // lokalne poki co
     for (int i = 0; i < gd.elements_count; i++) {
-        this->elements[i].stiffnessMatrix[0][0]
-                = this->elements[i].stiffnessMatrix[1][0]
-                = this->elements[i].stiffnessMatrix[0][1]
-                = this->elements[i].stiffnessMatrix[1][1]
+        this->elements[i].mat[0][0]
+                = this->elements[i].mat[1][0]
+                = this->elements[i].mat[0][1]
+                = this->elements[i].mat[1][1]
+                = 0.0;
+
+//        this->elements[i].mat[0][0] = 0.0;
+//        this->elements[i].mat[1][0] = 0.0;
+//        this->elements[i].mat[0][1] = 0.0;
+//        this->elements[i].mat[1][1] = 0.0;
+
+        this->elements[i].vec[0][0]
+                = this->elements[i].vec[1][0]
                 = 0.0;
     }
 }
@@ -180,13 +243,13 @@ public:
         for (int i = 0; i < count; i++) {
             Element1D e = elements[i];
 
-            globalMatrix[i][i]     += e.stiffnessMatrix[0][0];
-            globalMatrix[i][i+1]   += e.stiffnessMatrix[0][1];
-            globalMatrix[i+1][i]   += e.stiffnessMatrix[1][0];
-            globalMatrix[i+1][i+1] += e.stiffnessMatrix[1][1];
+            globalMatrix[i][i]     += e.mat[0][0];
+            globalMatrix[i][i+1]   += e.mat[0][1];
+            globalMatrix[i+1][i]   += e.mat[1][0];
+            globalMatrix[i+1][i+1] += e.mat[1][1];
 
-            globalMatrix[i][count+1]   += e.loadVector[0][0];
-            globalMatrix[i+1][count+1] += e.loadVector[1][0];
+            globalMatrix[i][count+1]   += e.vec[0][0];
+            globalMatrix[i+1][count+1] += e.vec[1][0];
 
         }
     }
@@ -198,28 +261,20 @@ public:
 
 int main()
 {
+    std::cout << "Program start" << std::endl;
     GlobalData data;
     data.loadFromFile("/home/niemcu/agh-stuff/pretmes/pretmes/wejscie.txt");
-
+    //std::cout << "Dane loaded" << std::endl;
     FEMGrid grid(data);
-
+    //std::cout << "Po konstruktorze" << std::endl;
     grid.calculate();
-
-//    grid.setBoundaryConditions();
-//    grid.setElements();
-//    grid.setLocalStiffnessMatricesAndLoadVectors();
+    //std::cout << "Po wszystkim" << std::endl;
+    grid.printGrid();
 
 //    SystemOfEquations sys(grid.getElements(), data.elementsCount);
-
 //    std::vector<double> result;
-
-//    sys.printGlobals();
-
 //    result = sys.solve();
 
-//    for (int i = 0; i < result.size(); i++) {
-//        std::cout << result[i] << "__";
-//    }
 
     return 0;
 }
@@ -242,46 +297,22 @@ bool GlobalData::loadFromFile(std::string path) {
 
 //    f.close();
 
-    this->elements_count = 5;
+    this->elements_count = 8;
     this->radius_min = 0.0;
-    this->radius_max = 0.05;
-    this->convection_modifier = 300;
+    this->radius_max = 0.08;
+    this->alfa = 300;
     this->temp_start = 100;
-    this->temp_air = 1200;
-    this->specific_heat = 700;
-    this->density = 7800;
-    this->conduction_modifier = 25;
+    this->temp_air = 200;
+    this->c = 700;
+    this->ro = 7800;
+    this->lambda = 25;
     this->time_max = 1000; // seconds
 
     this->nodes_count = this->elements_count + 1;
 
     this->integration_points_count = 2;
 
-
     return 0;
-}
-
-std::vector<Element1D> FEMGrid::getElements() {
-    return this->elements;
-}
-
-void FEMGrid::insertNodes() {
-    for (int i = 0; i < data.nodesCount; i++) {
-        Node newNode;
-        this->nodes.push_back(newNode);
-    }
-}
-
-void FEMGrid::setBoundaryConditions() {
-    for (int i = 0; i < data.nodesCount; i++) {
-        if (i == 0) {
-            this->nodes[i].bc = HEAT;
-        } else if (i == data.nodesCount - 1) {
-            this->nodes[i].bc = CONV;
-        } else {
-            this->nodes[i].bc = NONE;
-        }
-    }
 }
 
 std::vector<double> SystemOfEquations::solve() {
@@ -328,59 +359,22 @@ std::vector<double> SystemOfEquations::solve() {
     return x;
 }
 
-void FEMGrid::setElements() {
-    for (int i = 0; i < data.elementsCount; i++) {
-        Element1D el(this->elemLength, data.surface, data.modifier);
-        el.setNodes(this->nodes[i], this->nodes[i+1]);
-        this->elements[i] = el;
-    }
-}
-
-void FEMGrid::setLocalStiffnessMatricesAndLoadVectors() {
-    double C;
-    for (int i = 0; i < data.elementsCount; i++) {
-        Element1D e = this->elements[i];
-        C = (this->elements[i].modifier * this->elements[i].surface) / this->elements[i].length;
-        this->elements[i].stiffnessMatrix[0][0] = this->elements[i].stiffnessMatrix[1][1] =  C;
-        this->elements[i].stiffnessMatrix[0][1] = this->elements[i].stiffnessMatrix[1][0] = -C;
-
-        if (this->elements[i].nop1.bc == HEAT) {
-            this->elements[i].loadVector[0][0] += data.heat * data.surface;
-        }
-
-        if (this->elements[i].nop2.bc == CONV) {
-            this->elements[i].stiffnessMatrix[1][1] += data.alfa * data.surface;
-            this->elements[i].loadVector[1][0] -= data.alfa * data.surface * data.too;
-        }
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-
 
 void FEMGrid::printGrid() {
-    for (int i = 0; i < data.elementsCount; i++) {
+    std::cout << "ELo";
+    for (int i = 0; i < gd.elements_count; i++) {
         std::cout << "Macierz dla elementu " << i+1 << std::endl;
         Element1D e = this->elements[i];
         for (int j = 0; j < 2; j++) {
             for (int z = 0; z < 2; z++) {
-                std::cout << e.stiffnessMatrix[j][z];
+                std::cout << e.mat[j][z];
             }
             std::cout << std::endl;
         }
-        std::cout << "LoadVector dla elementu " << i+1 << std::endl;
+        std::cout << "vec dla elementu " << i+1 << std::endl;
         for (int j = 0; j < 2; j++) {
             for (int z = 0; z < 1; z++) {
-                std::cout << e.loadVector[j][z];
+                std::cout << e.vec[j][z];
             }
             std::cout << std::endl;
         }
