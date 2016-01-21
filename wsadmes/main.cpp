@@ -3,15 +3,6 @@
 #include <fstream>
 #include <cmath>
 
-// co to są funktory i traity sie dowiedz
-
-//class InputData {
-//public:
-//    //int elementsCount; // ilosc elementow skonczonych
-//    //int nodesCount; // ilosc wezlow
-//};
-
-
 class GlobalData {
 public:
 
@@ -65,7 +56,6 @@ public:
     ~SystemOfEquations() {}
 
     void setSystem(std::vector<Element1D> elements, int count);
-    void printGlobals();
     void resetGlobal();
     std::vector<double> solve();
 };
@@ -121,17 +111,15 @@ public:
     void printGrid();
     std::vector<Element1D> getElements();
 };
-
+// rozwiaz zadanie
 void FEMGrid::calculate() {
-
     double a_modifier = gd.lambda / (gd.c * gd.ro);
-
-    // wagi ptk calkowania sa 1
 
     double int_point1, int_point2;
 
-    int_point1 = -0.5773502692; //ty kurwa gnoju zgnijesz w piekle za to
+    int_point1 = -0.5773502692;
     int_point2 = int_point1 * (-1);
+    // Notice: poniewaz wagi ptk calkowania przy dwupunktowym sa rowne 1, nie uwzgledniam ich we wzorach
 
     double N1[2], N2[2];
 
@@ -145,10 +133,9 @@ void FEMGrid::calculate() {
 
     double time_step = ( dr * dr ) / ( 0.5 * a_modifier);
 
-    double n_time = (gd.time_max / time_step); // + 1 ????
+    double n_time = (gd.time_max / time_step);
     time_step = gd.time_max / n_time;
 
-    time_step = 50;
     double x = 0;
 
     // petla po wezlach ktora wpisze wspolrzedne oraz temp. poczatkowe do wezlow
@@ -158,26 +145,16 @@ void FEMGrid::calculate() {
         x += dr;
     }
 
-
-//        d_tmax = 0;
-//        tau = 0;
-
-
-
     double temp_tau[2];
 
     // petla po czasie
-    for (int i = 0; i < n_time; i++) { // albo o time_step ???>
-        //std::cout << "akutalny czas: " << n_time * i << std::endl;
-        // zerowanko macierzy globalnej
+    for (int i = 0; i < n_time; i++) {
+        // zerowanie macierzy globalnej
         SystemOfEquations sys;
-//        std::cout << "--------------------------------------------------------------";
-//        if (i > 0 ) sys.printGlobals();
-//        std::cout << "--------------------------------------------------------------";
-        //std::cout << "czas iter" << i << std::endl;
+
         // petla po elementach
         for (int j = 0; j < gd.elements_count; j++) {
-            //std::cout << "elem" << std::endl;
+
             double r1, r2;
             r1 = nodes[j].coord;
             r2 = nodes[j+1].coord;
@@ -192,9 +169,7 @@ void FEMGrid::calculate() {
                 alfa = gd.alfa;
             }
             // zerowanie macierzy lokalnych
-            //std::cout << "reset" << std::endl;
             resetMatrices();
-            //std::cout << "po resecie" << std::endl;
 
             // petla po punktach calkowania
             for (int k = 0; k < gd.integration_points_count; k++) {
@@ -203,42 +178,40 @@ void FEMGrid::calculate() {
 
                 // obliczanie macierzy lokalnej
                 this->elements[j].mat[0][0]
-                        += ((gd.lambda * rp * 1) / (dr))
-                         + gd.c * gd.ro * dr * rp * 1 * std::pow(N1[k], 2) / time_step;
+                        += ((gd.lambda * rp) / (dr))
+                         + gd.c * gd.ro * dr * rp * std::pow(N1[k], 2) / time_step;
 
                 this->elements[j].mat[0][1]
-                        += ((gd.lambda * rp * 1) / (dr))*(-1)
-                         + (gd.c * gd.ro * dr * rp * 1 * N1[k] * N2[k]) / (time_step);
+                        += ((gd.lambda * rp) / (dr))*(-1)
+                         + (gd.c * gd.ro * dr * rp * N1[k] * N2[k]) / (time_step);
 
                 this->elements[j].mat[1][0] = this->elements[j].mat[0][1];
 
                 this->elements[j].mat[1][1]
-                        += ((gd.lambda * rp * 1) / (dr))
-                         + (gd.c * gd.ro * dr * rp * 1 * std::pow(N2[k], 2)) / (time_step)
+                        += ((gd.lambda * rp) / (dr))
+                         + (gd.c * gd.ro * dr * rp * std::pow(N2[k], 2)) / (time_step)
                          + (2 * alfa * gd.radius_max); // ostatni czynnik jest zerem jak nie ma konwekcji
 
-                // lokalny wektor.
-
-                this->elements[j].vec[0][0] += (gd.c * gd.ro * dr * tp_tau * rp * 1 * N1[k]) / (time_step);
+                // obliczanie lokalnego wektora
+                this->elements[j].vec[0][0] += (gd.c * gd.ro * dr * tp_tau * rp * N1[k]) / (time_step);
 
                 this->elements[j].vec[1][0]
-                        += (gd.c * gd.ro * dr * tp_tau * rp * 1 * N2[k]) / (time_step)
+                        += (gd.c * gd.ro * dr * tp_tau * rp * N2[k]) / (time_step)
                          + (2 * alfa * gd.radius_max * gd.temp_air);
             } // koniec petli po punktach calkowania
 
-            // konstrukcja macierzy globalnej
             // niech kazdy element znajdzie swoje miejsce w macierzy globalnej
-
             sys.setSystem(this->elements, gd.elements_count);
 
         } // koniec petli po elementach skonczonych
+
         // rozwiaz uklad rownan w celu uzyskania nowych temperatur chwilowych
         std::vector<double> result;
 
         result = sys.solve();
         // przepisanie nowych wartosci temperatur do kazdego wezla
         for (int q = 0; q < result.size(); q++) {
-            std::cout << result[q] << "/";
+            std::cout << result[q] << ";";
             nodes[q].temp = result[q];
         }
         std::cout << std::endl;
@@ -262,9 +235,8 @@ void FEMGrid::resetMatrices() {
 
 int main()
 {
-    std::cout << "Program start" << std::endl;
     GlobalData data;
-    data.loadFromFile("/home/niemcu/agh-stuff/pretmes/pretmes/wejscie.txt");
+    data.loadFromFile("wejscie.txt");
 
     FEMGrid grid(data);
 
@@ -272,29 +244,40 @@ int main()
 
     return 0;
 }
+
 bool GlobalData::loadFromFile(std::string path) {
-//    std::fstream f(path.c_str(), std::ios_base::in);
+    std::fstream f(path.c_str(), std::ios_base::in);
 
-//    if (f.good()) {
-//        std::cout << "plik otworzon";
-//    } else {
-//        std::cout << "jest chujnia jakas";
-//    }
+    if (f.good()) {
+        std::cout << "Pomyslnie otwarlem plik z danymi." << std::endl;
+    } else {
+        std::cout << "nie udalo sie otworzyc pliku wejsciowego.";
+        return false;
+    }
 
-//    f >> this->elementsCount >> this->length >> this->surface >> this->modifier >> this->alfa >> this->heat >> this->too;
+    f >> this->elements_count
+            >> this->radius_min
+            >> this->radius_max
+            >> this->alfa
+            >> this->temp_start
+            >> this->temp_air
+            >> this->c
+            >> this->ro
+            >> this->lambda
+            >> this->time_max;
 
-//    f.close();
+    f.close();
 
-    this->elements_count = 8;
-    this->radius_min = 0.0;
-    this->radius_max = 0.08;
-    this->alfa = 300;
-    this->temp_start = 100;
-    this->temp_air = 200;
-    this->c = 700;
-    this->ro = 7800;
-    this->lambda = 25;
-    this->time_max = 1000; // seconds
+//    this->elements_count = 8;
+//    this->radius_min = 0.0;
+//    this->radius_max = 0.08;
+//    this->alfa = 300;
+//    this->temp_start = 100;
+//    this->temp_air = 200;
+//    this->c = 700;
+//    this->ro = 7800;
+//    this->lambda = 25;
+//    this->time_max = 1000; // seconds
 
     this->nodes_count = this->elements_count + 1;
 
@@ -302,11 +285,10 @@ bool GlobalData::loadFromFile(std::string path) {
 
     return 0;
 }
-
+// metoda gaussa rozwiazywania ukladow rownan
 std::vector<double> SystemOfEquations::solve() {
 
     for (int i = 0; i < rowsCount; i++) {
-        // Search for maximum in this column
         double maxEl = std::abs(globalMatrix[i][i]);
         int maxRow = i;
         for (int k = i + 1; k < rowsCount; k++) {
@@ -316,14 +298,11 @@ std::vector<double> SystemOfEquations::solve() {
             }
         }
 
-        // Swap maximum row with current row (column by column)
         for (int k = i; k < rowsCount + 1; k++) {
             double tmp = globalMatrix[maxRow][k];
             globalMatrix[maxRow][k] = globalMatrix[i][k];
             globalMatrix[i][k] = tmp;
         }
-
-        // Make all rows below this one 0 in current column
         for (int k = i + 1; k < rowsCount; k++) {
             double c = -globalMatrix[k][i] / globalMatrix[i][i];
             for (int j = i; j < rowsCount + 1; j++) {
@@ -335,8 +314,6 @@ std::vector<double> SystemOfEquations::solve() {
             }
         }
     }
-
-    // Solve equation Ax=b for an upper triangular matrix A
     std::vector<double> x(rowsCount);
     for (int i = rowsCount - 1; i >= 0; i--) {
         x[i] = globalMatrix[i][rowsCount] / globalMatrix[i][i];
@@ -345,39 +322,4 @@ std::vector<double> SystemOfEquations::solve() {
         }
     }
     return x;
-}
-
-
-void FEMGrid::printGrid() {
-    std::cout << "ELo";
-    for (int i = 0; i < gd.elements_count; i++) {
-        std::cout << "Macierz dla elementu " << i+1 << std::endl;
-        Element1D e = this->elements[i];
-        for (int j = 0; j < 2; j++) {
-            for (int z = 0; z < 2; z++) {
-                std::cout << e.mat[j][z];
-            }
-            std::cout << std::endl;
-        }
-        std::cout << "vec dla elementu " << i+1 << std::endl;
-        for (int j = 0; j < 2; j++) {
-            for (int z = 0; z < 1; z++) {
-                std::cout << e.vec[j][z];
-            }
-            std::cout << std::endl;
-        }
-    }
-}
-
-
-void SystemOfEquations::printGlobals() {
-    std::cout << "Wszystko: " << std::endl;
-    for (int i = 0; i < rowsCount; i++) {
-        std::cout << "[ ";
-        for (int j = 0; j < rowsCount + 1; j++) {
-                std::cout << globalMatrix[i][j] << " ";
-        }
-        std::cout << " ] ";
-        std::cout << std::endl;
-    }
 }
