@@ -1,0 +1,65 @@
+Podaj liczbe watkow: 
+poczatek
+EXECUTION TIME: executing standard loop: 0.244277
+	Number of operations 737280000, PERFORMANCE 3.018213 GFlops
+	GBytes transferred to processor 2.949120, speed 12.072852 GB/s
+TEST
+EXECUTION TIME: executing standard loop: 0.461015
+	Number of operations 737280000, PERFORMANCE 1.599254 GFlops
+	GBytes transferred to processor 2.949120, speed 6.397015 GB/s
+TEST 2
+EXECUTION TIME: executing standard loop: 0.426728
+	Number of operations 737280000, PERFORMANCE 1.727752 GFlops
+	GBytes transferred to processor 2.949120, speed 6.911006 GB/s
+Podaj liczbe watkow: 
+poczatek
+EXECUTION TIME: executing standard loop: 0.208212
+	Number of operations 737280000, PERFORMANCE 3.541004 GFlops
+	GBytes transferred to processor 2.949120, speed 14.164016 GB/s
+TEST
+EXECUTION TIME: executing standard loop: 0.422046
+	Number of operations 737280000, PERFORMANCE 1.746918 GFlops
+	GBytes transferred to processor 2.949120, speed 6.987671 GB/s
+TEST 2
+EXECUTION TIME: executing standard loop: 0.287431
+	Number of operations 737280000, PERFORMANCE 2.565068 GFlops
+	GBytes transferred to processor 2.949120, speed 10.260271 GB/s
+Podaj liczbe watkow: 
+poczatek
+EXECUTION TIME: executing standard loop: 0.167724
+	Number of operations 737280000, PERFORMANCE 4.395796 GFlops
+	GBytes transferred to processor 2.949120, speed 17.583183 GB/s
+TEST
+EXECUTION TIME: executing standard loop: 0.791051
+	Number of operations 737280000, PERFORMANCE 0.932026 GFlops
+	GBytes transferred to processor 2.949120, speed 3.728103 GB/s
+TEST 2
+EXECUTION TIME: executing standard loop: 0.187907
+	Number of operations 737280000, PERFORMANCE 3.923639 GFlops
+	GBytes transferred to processor 2.949120, speed 15.694554 GB/s
+Podaj liczbe watkow: 
+poczatek
+EXECUTION TIME: executing standard loop: 0.170980
+	Number of operations 737280000, PERFORMANCE 4.312084 GFlops
+	GBytes transferred to processor 2.949120, speed 17.248335 GB/s
+TEST
+EXECUTION TIME: executing standard loop: 0.291025
+	Number of operations 737280000, PERFORMANCE 2.533389 GFlops
+	GBytes transferred to processor 2.949120, speed 10.133557 GB/s
+TEST 2
+EXECUTION TIME: executing standard loop: 0.197884
+	Number of operations 737280000, PERFORMANCE 3.725822 GFlops
+	GBytes transferred to processor 2.949120, speed 14.903288 GB/s
+Podaj liczbe watkow: 
+poczatek
+EXECUTION TIME: executing standard loop: 0.169827
+	Number of operations 737280000, PERFORMANCE 4.341360 GFlops
+	GBytes transferred to processor 2.949120, speed 17.365438 GB/s
+TEST
+EXECUTION TIME: executing standard loop: 0.698793
+	Number of operations 737280000, PERFORMANCE 1.055076 GFlops
+	GBytes transferred to processor 2.949120, speed 4.220306 GB/s
+TEST 2
+EXECUTION TIME: executing standard loop: 0.226059
+	Number of operations 737280000, PERFORMANCE 3.261450 GFlops
+	GBytes transferred to processor 2.949120, speed 13.045800 GB/s
