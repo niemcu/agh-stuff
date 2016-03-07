@@ -2,9 +2,13 @@
 // autor: ympeg
 // konwencja: zmienne z underscore, funkcje camelcasem;
 
-var Grid = (function () {
+var Grid = (function (canvasWidth, canvasHeight, cellSize) {
+
 })();
 
+// var curr_field = new Field(canvas_width, canvas_height, cell_size)
+// var next_field = new Field(canvas_width, canvas_height, cell_size)
+// curr_field
 var applyGrid = function (cvs, size) {
 	var ctx = cvs.getContext('2d'),
 			  w = cvs.width,
@@ -27,7 +31,7 @@ var applyGrid = function (cvs, size) {
 document.addEventListener('DOMContentLoaded', function() {
 	var cvs = document.getElementById('game-canvas'),
 			ctx = cvs.getContext('2d'),
-			cell_size = 20,
+			cell_size = 10,
 			field = new Array(cell_size),
 			width = cvs.width / cell_size,
 			height = cvs.height / cell_size;
@@ -36,13 +40,15 @@ document.addEventListener('DOMContentLoaded', function() {
 	for (var i = 0; i < width; i++) {
 		field[i] = new Array(cell_size);
 		for (var j = 0; j < height; j++) {
-			field[i][j] = Math.round(Math.random());
+			//field[i][j] = Math.round(Math.random());
+			field[i][j] = 0;
 		}
 	}
 
 	for (var i = 0; i < width; i++) {
 		for (var j = 0; j < height; j++) {
 			if (field[i][j] != 0) {
+				ctx.fillStyle = '#D3AC75';
 				ctx.fillRect(i * cell_size, j * cell_size, cell_size, cell_size);
 			}
 		}
@@ -53,5 +59,4 @@ document.addEventListener('DOMContentLoaded', function() {
 	
 	applyGrid(cvs, cell_size);
 
-	// 6 kolumna, 8 wiersz;
 });
