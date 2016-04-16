@@ -8,6 +8,7 @@ body {
 	/* background: #fff; */
 	color: #eee;
 	width: 100%;
+	font-family: calibri;
 }
 
 #all, #main {
@@ -18,7 +19,7 @@ header, footer, #content, nav {
 	width: 60%;
 }
 
-header, footer, #content {
+header, footer, #content, #panel {
 	padding: 12px;
 }
 
@@ -40,7 +41,7 @@ nav {
 
 footer {
 	margin-top: 5px;
-	background: #333;
+	background: #777;
 }
 
 nav ul {
@@ -104,6 +105,30 @@ h1 {
 	color: #111;
 }
 
+button {
+	width: 60px;
+	height: 60px;
+	background: #6047C4;
+	border: 1px solid #4E39A3;
+	font-family: monospace;
+	color: #C3B9EB;
+	font-weight: 100;
+	cursor: pointer;
+}
+
+label {
+	display: block;
+}
+
+input {
+	width: 60px;
+	height: 60px;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
 .auto1d { 
 	background: #7A59FF; 
 	/* border-bottom: 5px solid #4E39A3; */
@@ -113,28 +138,28 @@ h1 {
 	background: #4E39A3;
 	transition: ease .7s;
 }
-
+/* 
 .conway, .conway:hover { 
 	background: #D14B4B; 
-	/* border-bottom: 5px solid #8A2F2F; */
+	/* border-bottom: 5px solid #8A2F2F; 
 }
-
+/* 
 .ant, .ant:hover { 
 	background: #3BB01A; 
-	/* border-bottom: 5px solid #2C7517; */
+	/* border-bottom: 5px solid #2C7517;
 }
 
 .recrystal, .recrystal:hover { 
 	background: #4BDE95; 
-	/* border-bottom: 5px solid #39A36E; */
+	/* border-bottom: 5px solid #39A36E;
 }
 
 .monte, .monte:hover { 
 	background: #5268BF; 
-	/* border-bottom: 5px solid #364687; */
+	/* border-bottom: 5px solid #364687;
 }
 
 .grain, .grain:hover {
 	background: #DB9C2E; 
-	/* border-bottom: 5px solid #A6731B; */
-}
+	/* border-bottom: 5px solid #A6731B;
+} */

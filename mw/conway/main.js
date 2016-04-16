@@ -1,9 +1,11 @@
 // autor: ympeg
 // konwencja: wszystko camelcase
 var opt = {
-	cellSize: 11, 
-	cellsPerRow: 71,
-	rowsCount: 60
+	cellSize: 10, 
+	cellsPerRow: 150,
+	rowsCount: 60,
+	rule: 150,
+	grid: true
 };
 
 var elements = {};
@@ -14,7 +16,6 @@ function setup() {
 	currentRow = new Array(opt.cellsPerRow + 2).fill(0);
 	var x = Math.floor(opt.cellsPerRow / 2);
 	currentRow[x] = 1;
-	
 }
 
 function clear() {
@@ -32,7 +33,7 @@ function run() {
 		recalculate();
 	}
 	
-	applyGrid();
+	if (opt.grid) applyGrid();
 }
 
 run();
@@ -58,8 +59,8 @@ function buildCanvas() {
 	elements.canvasContainer = cnt;
 }
 
-function setRule(rule = 150) {
-	var bin = dec2bin(rule, 8),
+function setRule() {
+	var bin = dec2bin(opt.rule, 8),
 		len = bin.length;
 	for (var i = 0; i < len; i++) {
 		var index = dec2bin(i, 3);
@@ -123,6 +124,79 @@ function recalculate() {
 	}
 	currentRow = nextRow;
 }
+
+// why dis must be so ugly yhhhhh
+function setupPanel() {
+	elements.cellsAmount = document.getElementById('cells-amount');
+	elements.cellsAmount.value = opt.cellsPerRow;
+	
+	document.getElementById('cells-plus').addEventListener('click', function () {
+		elements.cellsAmount.value++;
+		opt.cellsPerRow = parseInt(elements.cellsAmount.value);
+		clear();
+		run();
+	}, false);
+
+	document.getElementById('cells-minus').addEventListener('click', function () {
+		elements.cellsAmount.value--;
+		opt.cellsPerRow = parseInt(elements.cellsAmount.value);
+		clear();
+		run();
+	}, false);
+	
+	elements.rule = document.getElementById('rule');
+	elements.rule.value = opt.rule;
+	
+	document.getElementById('rule-plus').addEventListener('click', function () {
+		elements.rule.value++;
+		opt.rule = parseInt(elements.rule.value);
+		clear();
+		run();
+	}, false);
+
+	document.getElementById('rule-minus').addEventListener('click', function () {
+		elements.rule.value--;
+		opt.rule = parseInt(elements.rule.value);
+		clear();
+		run();
+	}, false);
+	
+	elements.iterations = document.getElementById('iterations');
+	elements.iterations.value = opt.rowsCount;
+	
+	document.getElementById('iter-plus').addEventListener('click', function () {
+		elements.iterations.value++;
+		opt.rowsCount = parseInt(elements.iterations.value);
+		clear();
+		run();
+	}, false);
+
+	document.getElementById('iter-minus').addEventListener('click', function () {
+		elements.iterations.value--;
+		opt.rowsCount = parseInt(elements.iterations.value);
+		clear();
+		run();
+	}, false);
+	
+	elements.grid = document.getElementById('grid');
+	
+	elements.grid.addEventListener('change', function () {
+		//console.log('grid przed', opt.grid);
+		elements.grid.checked = opt.grid = !opt.grid;
+		//console.log('grid po', opt.grid);
+		clear();
+		run();
+	}, false);
+	
+}
+// use it to optimize?
+function clearCanvas() {
+	var ctx = elements.canvas.getContext('2d');
+	ctx.clearRect(0, 0, elements.canvas.width, elements.canvas.height);
+}
+
+setupPanel();
+
 
 
 
