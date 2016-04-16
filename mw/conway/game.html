@@ -1,12 +1,16 @@
 <!doctype html>
 <html>
 	<head>
-		<title>Conway's Game of Life</title>
+		<title>Automaty komórkowe</title>
 		<meta charset="UTF-8">
 		<link rel="stylesheet" href="style.css" type="text/css">
 	</head>
 	<body>
-		<canvas id="game-canvas" width="1300" height="600"></canvas>
+		<label for="cells_amount">Ilość komórek w rzędzie: </label>
+		<input type="number" name="cells_amount" id="amount" />
+		<button type="button" id="cells-apply">Zastosuj</button>
+		<button type="button" id="baton">Przelicz</button>
+		<div id="canvas-container"></div>
 		<script type="text/javascript" src="main.js"></script>
 	</body>
 </html>
