@@ -1,3 +1,140 @@
+* {
+	padding: 0;
+	margin: 0;
+	box-sizing: border-box;
+}
+
+body {
+	/* background: #fff; */
+	color: #eee;
+	width: 100%;
+}
+
+#all, #main {
+	width: 100%;
+}
+
+header, footer, #content, nav {
+	width: 60%;
+}
+
+header, footer, #content {
+	padding: 12px;
+}
+
+header, footer, nav {
+	margin-left: 55px;
+}
+
+nav {
+	margin-bottom: 5px;
+}
+
+#main {
+	border-left: 40px solid #F2EFDA;
+	padding-left: 5px;
+	width: calc(100% + 45px);
+	display: flex;
+	margin-left: 10px;
+}
+
+footer {
+	margin-top: 5px;
+	background: #333;
+}
+
+nav ul {
+	list-style-type: none;
+	font-size: 0; /* inline-block issue */
+}
+
+nav ul li {
+	display: inline-block;
+	padding: 0 5px;
+	width: calc(100% / 6);
+}
+
+nav ul li:first-child {
+	padding-left: 0;
+}
+
+nav ul li:last-child {
+	padding-right: 0;
+}
+
+nav ul li a {
+	background: #999;
+	padding: 15px 10px;
+	display: block;
+	text-decoration: none;
+	color: #fff;
+	font-family: calibri;
+	text-transform: uppercase;
+	text-align: center;
+	font-size: 10pt;
+}
+
+#canvas-container {
+}
+
+#content {
+	float: left;
+	/* width: 60%; */
+	background: #ccc;
+	border-top: 10px solid #4E39A3;
+}
+
+#panel {
+	border-top: 10px solid #4E39A3;
+	background: #7A59FF;
+	width: 330px;
+	float: left;
+	margin-left: 5px;
+}
+
 canvas {
 	border: 1px solid #000;
+	background: #fff;
+}
+
+h1 {
+	font-family: calibri;
+	font-size: 42pt;
+	font-weight: 100;
+	color: #111;
+}
+
+.auto1d { 
+	background: #7A59FF; 
+	/* border-bottom: 5px solid #4E39A3; */
+}
+
+.auto1d:hover {
+	background: #4E39A3;
+	transition: ease .7s;
+}
+
+.conway, .conway:hover { 
+	background: #D14B4B; 
+	/* border-bottom: 5px solid #8A2F2F; */
+}
+
+.ant, .ant:hover { 
+	background: #3BB01A; 
+	/* border-bottom: 5px solid #2C7517; */
+}
+
+.recrystal, .recrystal:hover { 
+	background: #4BDE95; 
+	/* border-bottom: 5px solid #39A36E; */
+}
+
+.monte, .monte:hover { 
+	background: #5268BF; 
+	/* border-bottom: 5px solid #364687; */
+}
+
+.grain, .grain:hover {
+	background: #DB9C2E; 
+	/* border-bottom: 5px solid #A6731B; */
 }
