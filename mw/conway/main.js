@@ -2,10 +2,11 @@
 // konwencja: wszystko camelcase
 var opt = {
 	cellSize: 10, 
-	cellsPerRow: 150,
-	rowsCount: 60,
+	cellsPerRow: 200,
+	rowsCount: 300,
 	rule: 150,
-	grid: true
+	grid: false,
+	boundary: 0
 };
 
 var elements = {};
@@ -100,10 +101,9 @@ function drawCurrentRow(cursor) {
 	}
 }
 
-// na razie przyjmujemy ze jest 0
-function setBoundary(val = 0) {
-	currentRow[0] = val;
-	currentRow[opt.cellsPerRow + 1] = val;
+function setBoundary() {
+	currentRow[0] = opt.boundary;
+	currentRow[opt.cellsPerRow + 1] = opt.boundary;
 }
 
 function dec2bin (dec, length) {
@@ -132,16 +132,12 @@ function setupPanel() {
 	
 	document.getElementById('cells-plus').addEventListener('click', function () {
 		elements.cellsAmount.value++;
-		opt.cellsPerRow = parseInt(elements.cellsAmount.value);
-		clear();
-		run();
+		handleCellsChange();
 	}, false);
 
 	document.getElementById('cells-minus').addEventListener('click', function () {
 		elements.cellsAmount.value--;
-		opt.cellsPerRow = parseInt(elements.cellsAmount.value);
-		clear();
-		run();
+		handleCellsChange();
 	}, false);
 	
 	elements.rule = document.getElementById('rule');
@@ -149,16 +145,12 @@ function setupPanel() {
 	
 	document.getElementById('rule-plus').addEventListener('click', function () {
 		elements.rule.value++;
-		opt.rule = parseInt(elements.rule.value);
-		clear();
-		run();
+		handleRuleChange();
 	}, false);
 
 	document.getElementById('rule-minus').addEventListener('click', function () {
 		elements.rule.value--;
-		opt.rule = parseInt(elements.rule.value);
-		clear();
-		run();
+		handleRuleChange();
 	}, false);
 	
 	elements.iterations = document.getElementById('iterations');
@@ -166,24 +158,59 @@ function setupPanel() {
 	
 	document.getElementById('iter-plus').addEventListener('click', function () {
 		elements.iterations.value++;
-		opt.rowsCount = parseInt(elements.iterations.value);
-		clear();
-		run();
+		handleIterChange();
 	}, false);
 
 	document.getElementById('iter-minus').addEventListener('click', function () {
 		elements.iterations.value--;
+		handleIterChange();
+	}, false);
+	
+	elements.cellsAmount.addEventListener('change', handleCellsChange, false);
+	elements.rule.addEventListener('change', handleRuleChange, false);
+	elements.iterations.addEventListener('change', handleIterChange, false);
+	
+	function handleCellsChange() {
+		opt.cellsPerRow = parseInt(elements.cellsAmount.value);
+		clear();
+		run();		
+	}
+	
+	function handleRuleChange() {
+		opt.rule = parseInt(elements.rule.value);
+		clear();
+		run();		
+	}
+	
+	function handleIterChange() {
 		opt.rowsCount = parseInt(elements.iterations.value);
 		clear();
 		run();
-	}, false);
+	}
 	
 	elements.grid = document.getElementById('grid');
 	
 	elements.grid.addEventListener('change', function () {
-		//console.log('grid przed', opt.grid);
 		elements.grid.checked = opt.grid = !opt.grid;
-		//console.log('grid po', opt.grid);
+		clear();
+		run();
+	}, false);
+	
+	elements.bcZeroBtn = document.getElementById('bc-zero');
+	elements.bcOneBtn = document.getElementById('bc-one');
+	
+	elements.bcZeroBtn.addEventListener('click', function () {
+		opt.boundary = 0;
+		elements.bcZeroBtn.className = 'active-bc';
+		elements.bcOneBtn.className = '';
+		clear();
+		run();
+	}, false);
+	
+	elements.bcOneBtn.addEventListener('click', function () {
+		opt.boundary = 1;
+		elements.bcOneBtn.className = 'active-bc';
+		elements.bcZeroBtn.className = '';
 		clear();
 		run();
 	}, false);
@@ -198,18 +225,9 @@ function clearCanvas() {
 setupPanel();
 
 
-
-
 // (optional) wyklikanie stanu poczatkowego
 
-/* 	document.getElementById('baton').addEventListener('click', function () {
-		console.log(counter);
-		console.log('pole', field);
-		recalculate(field[counter]);
-		counter++;
-	}, false);
-	
-}
+/*
 document.addEventListener('DOMContentLoaded', function() {
 	
 	init();

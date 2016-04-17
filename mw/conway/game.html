@@ -26,8 +26,8 @@
 				</section>
 				<section id="panel">
 					<h2>automaty 1D</h2>
-					<h3>panel sterowania</h3>
-					<h4>opcje algorytmu</h4>
+					<h3>opcje algorytmu</h3>
+					
 					<label for="rule">Reguła: </label>
 					<input type="number" name="rule" id="rule" />
 					<button type="button" id="rule-plus">+</button>
@@ -37,13 +37,23 @@
 					<input type="number" name="cells-amount" id="cells-amount" />
 					<button type="button" id="cells-plus">+</button>
 					<button type="button" id="cells-minus">-</button>
-					<h4>opcje wyświetlania</h4>
+					
+					<label for="iterations">Ilość wierszy (iteracji): </label>
+					<input type="number" name="iterations" id="iterations" />
+					<button type="button" id="iter-plus">+</button>
+					<button type="button" id="iter-minus">-</button>
+					
+					<label>Komórki brzegowe: </label>
+					<button type="button" id="bc-zero" class="active-bc">równe 0</button>
+					<button type="button" id="bc-one">równe 1</button>
+					
+					<h3>opcje wyświetlania</h3>
 					<label for="grid">Pokaż/ukryj siatkę: </label>
 					<input type="checkbox" name="grid" id="grid" checked/>
 				</section>
 			</section>
 			<footer>
-				(c) szympi
+				created with joy and fun by @ympeg. relax, it's open-source. <a href="mailto:szniemcu@gmail.com">contact me</a>
 			</footer>
 		</section>	
 		<script type="text/javascript" src="main.js"></script>

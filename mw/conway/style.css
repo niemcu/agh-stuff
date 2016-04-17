@@ -11,6 +11,10 @@ body {
 	font-family: calibri;
 }
 
+a {
+	color: #eee;
+}
+
 #all, #main {
 	width: 100%;
 }
@@ -88,7 +92,7 @@ nav ul li a {
 #panel {
 	border-top: 10px solid #4E39A3;
 	background: #7A59FF;
-	width: 330px;
+	width: 250px;
 	float: left;
 	margin-left: 5px;
 }
@@ -105,6 +109,31 @@ h1 {
 	color: #111;
 }
 
+h2 {
+	background: #6854BA;
+	margin: -12px -12px 0 -12px;
+	text-align: center;
+	padding: 7px 0 12px 0;
+	font-size: 24pt;
+	color: #fff;
+	font-weight: 100;
+	letter-spacing: 1px;
+}
+
+/* h2 span {
+	display: block;
+	font-size: 10pt;
+	letter-spacing: initial;
+}
+ */
+h3 {
+	border-bottom: 3px solid #6854BA;
+	font-weight: 100;
+	letter-spacing: 2px;
+	text-align: center;
+	margin: 25px 0 10px 0;
+}
+
 button {
 	width: 60px;
 	height: 60px;
@@ -116,13 +145,20 @@ button {
 	cursor: pointer;
 }
 
+.active-bc {
+	border: 1px solid #fff;
+	color: #fff;
+}
+
 label {
 	display: block;
+	padding: 8px 0;
 }
 
 input {
 	width: 60px;
 	height: 60px;
+	text-align: center;
 }
 
 input[type="number"] {
