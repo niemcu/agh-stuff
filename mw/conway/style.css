@@ -19,6 +19,39 @@ a {
 	width: 100%;
 }
 
+#color-picker {
+	list-style-type: none;
+}
+
+#color-picker li {
+	width: 15%;
+	height: 20px;
+	margin: 3px;
+	display: inline-block;
+	border: 1px solid #fff;
+	cursor: pointer;
+}
+
+#color-picker li.active {
+	box-shadow: 0 0 5px 1px;
+}
+
+#color-picker li#gold {
+	background: #D3AC75;
+}
+
+#color-picker li#rose {
+	background: #E3A3DA;
+}
+
+#color-picker li#green {
+	background: #9BE68E;
+}
+
+#color-picker li#blue {
+	background: #55C2ED;
+}
+
 header, footer, #content, nav {
 	width: 60%;
 }
@@ -28,7 +61,7 @@ header, footer, #content, #panel {
 }
 
 header, footer, nav {
-	margin-left: 55px;
+	margin-left: 125px;
 }
 
 nav {
@@ -36,9 +69,9 @@ nav {
 }
 
 #main {
-	border-left: 40px solid #F2EFDA;
+	border-left: 110px solid #F2EFDA;
 	padding-left: 5px;
-	width: calc(100% + 45px);
+	width: calc(100% + 115px);
 	display: flex;
 	margin-left: 10px;
 }
@@ -86,12 +119,12 @@ nav ul li a {
 	float: left;
 	/* width: 60%; */
 	background: #ccc;
-	border-top: 10px solid #4E39A3;
+	border-top: 10px solid #8A2F2F;
 }
 
 #panel {
-	border-top: 10px solid #4E39A3;
-	background: #7A59FF;
+	border-top: 10px solid #8A2F2F;
+	background: #DE5E5E;
 	width: 250px;
 	float: left;
 	margin-left: 5px;
@@ -111,7 +144,7 @@ h1 {
 }
 
 h2 {
-	background: #6854BA;
+	background: #D14B4B;
 	margin: -12px -12px 0 -12px;
 	text-align: center;
 	padding: 7px 0 12px 0;
@@ -128,20 +161,24 @@ h2 {
 }
  */
 h3 {
-	border-bottom: 3px solid #6854BA;
+	border-bottom: 3px solid #D14B4B;
 	font-weight: 100;
 	letter-spacing: 2px;
 	text-align: center;
 	margin: 25px 0 10px 0;
 }
 
+input.normal {
+	width: 100%;
+}
+
 button {
 	width: 60px;
 	height: 60px;
-	background: #6047C4;
-	border: 1px solid #4E39A3;
+	background: #D14B4B;
+	border: 1px solid #8A2F2F;
 	font-family: monospace;
-	color: #C3B9EB;
+	color: #FEB0B0;
 	font-weight: 100;
 	cursor: pointer;
 }
@@ -174,13 +211,26 @@ input[type="number"] {
 
 .auto1d:hover {
 	background: #4E39A3;
-	transition: ease .7s;
+	transition: ease .4s;
 }
-/* 
-.conway, .conway:hover { 
+.conway { 
 	background: #D14B4B; 
-	/* border-bottom: 5px solid #8A2F2F; 
 }
+
+.conway:hover, .conway.active {
+	background: #8A2F2F;
+	transition: ease .4s;
+}
+
+/* #content.conway {
+	border-top: 10px solid #8A2F2F;
+}
+
+#panel.conway {
+	border-top: 10px solid #8A2F2F;
+	background: #BF4545;
+} */
+
 /* 
 .ant, .ant:hover { 
 	background: #3BB01A; 
