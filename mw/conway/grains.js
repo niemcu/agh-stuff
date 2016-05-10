@@ -1,129 +1,44 @@
 // autor: ympeg
 // konwencja: wszystko camelcase
-var GameOfLife = (function() {
+var Grains = (function() {
 	
 	var opt = {
 		cellSize: 10, 
-		rule: 150,
 		grid: false,
 		boundary: 0,
 		fillColor: '#D3AC75',
 		rows: 50,
-		cols: 70,
-		periodic: true,
+		cols: 100,
+		periodic: false,
 		speed: 50,
 		timer: null,
 		generation: 0,
-		imageMode: false
+		imageMode: false,
+		nucleidsCount: 20
 	};
 
+	var colors = [];
+	colors[0] = '#FFFFFF';
+	
 	var dom = {};
-	var ruleTable = {};
-	var currentRow;
 	
 	var currentState = new Array(opt.rows);
 	
 	function setup() {
-		/* currentRow = new Array(opt.cols + 2).fill(0);
-		var x = Math.floor(opt.cols / 2);
-		currentRow[x] = 1; */
-		
 		for (var i = 0; i < opt.rows; i++) {
 			currentState[i] = new Array(opt.cols).fill(0);
 		}
-		
 		randomizeState();
-	}
-	// czy jest jakis piekny sposob na to zeby nie duplikowac tak tego kodu?
-	function putGlider() {
-		processEachCell(function (i, j) {
-			currentState[i][j] = 0;
-		});
-		
-		currentState[1][3] = 1;
-		currentState[2][4] = 1;
-		currentState[3][2] = 1;
-		currentState[3][3] = 1;
-		currentState[3][4] = 1;
-		
-		drawField();
-	}
-	
-	function putPond () {
-		processEachCell(function (i, j) {
-			currentState[i][j] = 0;
-		});
-		
-		currentState[5][6] = 1;
-		currentState[5][5] = 1;
-		currentState[6][7] = 1;
-		currentState[7][7] = 1;
-		currentState[8][6] = 1;
-		currentState[8][5] = 1;
-		currentState[7][4] = 1;
-		currentState[6][4] = 1;
-		
-		drawField();
-	}
-	
-	function putBeeQueen () {
-		processEachCell(function (i, j) {
-			currentState[i][j] = 0;
-		});
-		
-		currentState[15][15] = 1;
-		currentState[16][15] = 1;
-		currentState[17][16] = 1;
-		currentState[18][16] = 1;
-		currentState[19][16] = 1;
-		currentState[20][15] = 1;
-		currentState[21][15] = 1;
-		currentState[16][17] = 1;
-		currentState[20][17] = 1;
-		currentState[17][18] = 1;
-		currentState[19][18] = 1;
-		currentState[18][19] = 1;
-		
-		drawField();		
-	}
-	
-	function putFrog() {
-		processEachCell(function (i, j) {
-			currentState[i][j] = 0;
-		});
-		
-		currentState[5][5] = 1;
-		currentState[6][5] = 1;
-		currentState[7][5] = 1;
-		currentState[6][6] = 1;
-		currentState[7][6] = 1;
-		currentState[8][6] = 1;
-		
-		drawField();
-	}
-	
-	
-	
-	
-	
-	
-	function putInfinite() {
-		currentState[1][7] = 1;
-		currentState[2][5] = 1;
-		currentState[2][7] = 1;
-		currentState[2][8] = 1;
-		currentState[3][5] = 1;
-		currentState[3][7] = 1;
-		currentState[4][5] = 1;			
-		currentState[5][3] = 1;			
-		currentState[6][1] = 1;			
-		currentState[6][3] = 1;			
 	}
 	
 	function randomizeState() {
-		processEachCell(function (i, j) {
-				currentState[i][j] = Math.round(Math.random());
-		});
+		for (var k = 1; k <= opt.nucleidsCount; k++) {
+			var i = Math.floor(Math.random() * opt.rows);
+			var j = Math.floor(Math.random() * opt.cols);
+			
+			currentState[i][j] = k;
+			colors[k] = '#'+Math.floor(Math.random()*16777215).toString(16);
+		}
 	}
 	
 	function processEachCell(callback) {
@@ -150,13 +65,13 @@ var GameOfLife = (function() {
 			dom.ctx.drawImage(opt.img, pos.x, pos.y);
 			opt.imageMode = false;
 		} else {
-			var i = Math.floor(pos.x / opt.cellSize),
-				j = Math.floor(pos.y / opt.cellSize);
+			var j = Math.floor(pos.x / opt.cellSize),
+				i = Math.floor(pos.y / opt.cellSize);
 			
-			if (currentState[j][i] == 1) {
-				currentState[j][i] = 0;
+			if (currentState[i][j] == 1) {
+				currentState[i][j] = 0;
 			} else {
-				currentState[j][i] = 1;
+				currentState[i][j] = 1;
 			}
 			drawField();	
 		}
@@ -185,15 +100,15 @@ var GameOfLife = (function() {
 		
 		drawField();
 	}
+	
 	// todo REFACTOR
 	function drawField () { //console.log('draw');
-		var ctx = dom.canvas.getContext('2d');
+		var ctx = dom.ctx;
 		clearCanvas();
-		ctx.fillStyle = opt.fillColor;
 		processEachCell(function (i, j) {
-			if (currentState[i][j] != 0) {
+			var c = currentState[i][j];
+				ctx.fillStyle = colors[c];
 				ctx.fillRect(j * opt.cellSize, i * opt.cellSize, opt.cellSize, opt.cellSize);
-			}
 		});
 		
 		if (opt.grid) applyGrid();		
@@ -260,20 +175,15 @@ var GameOfLife = (function() {
 		
 		for (var i = x; i < opt.rows -x; i++) {
 			for (var j = x; j < opt.cols -x; j++) {
-				var c = currentState[i][j],
-					m = moore(i, j);
-
+				var c = currentState[i][j];
 				if (c == 0) {
-					if (m == 3) nextState[i][j] = 1;
+					m = moore(i, j);
+					//console.log('aaa', m);
+					nextState[i][j] = m;
+				} else {
+					nextState[i][j] = c;
 				}
-			
-				if (c == 1) {
-					if (m == 2 || m == 3) {
-						nextState[i][j] = 1;
-					} else {
-						nextState[i][j] = 0;
-					}
-				}	
+				//console.log(m);
 			}
 		}
 		currentState = nextState;
@@ -284,13 +194,13 @@ var GameOfLife = (function() {
 		opt.generation++;
 		dom.gencnt.textContent = opt.generation;
 	}
-	// returns how many ALIVE neighbours given cell has in terms of Moore's neighbourhood
+
 	function moore(i, j, periodic) {
+		var list = new Array(opt.nucleidsCount + 1).fill(0);
 		
 		periodic = periodic || opt.periodic;
 		
-		var out = 0,
-			k = i - 1,
+		var k = i - 1,
 			l = j - 1,
 			m = i + 1,
 			n = j + 1;
@@ -313,18 +223,31 @@ var GameOfLife = (function() {
 			}
 		}
 		
-		out += currentState[k][l];
-		out += currentState[k][j];
-		out += currentState[k][n];
+		list[currentState[k][l]]++;
+		list[currentState[k][j]]++;
+		list[currentState[k][n]]++;
 		
-		out += currentState[i][l];
-		out += currentState[i][n];
+		list[currentState[i][l]]++;
+		list[currentState[i][n]]++;
+		list[currentState[i][j]]++;
 		
-		out += currentState[m][l];
-		out += currentState[m][j];
-		out += currentState[m][n];
+		list[currentState[m][l]]++;
+		list[currentState[m][j]]++;
+		list[currentState[m][n]]++;
 		
-		return out;
+		var max1 = Math.max.apply(null, list);
+		var idx = list.indexOf(max1);
+
+		if (idx == 0) {
+			if (max1 == 9) {
+				return 0;
+			} else {
+				list.shift();
+				return list.indexOf(Math.max.apply(null, list)) + 1;
+			}
+		} else {
+			return idx;
+		}
 	}
 
 	function loop() {
@@ -366,10 +289,10 @@ var GameOfLife = (function() {
 		document.getElementById('iter-plus').addEventListener('click', function () { dom.iterations.value++; handleIterChange(); }, false);
 		document.getElementById('iter-minus').addEventListener('click', function () { dom.iterations.value--; handleIterChange(); }, false);
 		
-		document.getElementById('pond').addEventListener('click', putPond, false);
-		document.getElementById('beequeen').addEventListener('click', putBeeQueen, false);
-		document.getElementById('glider').addEventListener('click', putGlider, false);
-		document.getElementById('frog').addEventListener('click', putFrog, false);
+		// document.getElementById('pond').addEventListener('click', putPond, false);
+		// document.getElementById('beequeen').addEventListener('click', putBeeQueen, false);
+		// document.getElementById('glider').addEventListener('click', putGlider, false);
+		// document.getElementById('frog').addEventListener('click', putFrog, false);
 		
 
 		

@@ -246,8 +246,13 @@ input[type="number"] {
 	background: #5268BF; 
 	/* border-bottom: 5px solid #364687;
 }
+*/
 
-.grain, .grain:hover {
-	background: #DB9C2E; 
-	/* border-bottom: 5px solid #A6731B;
-} */
+.grain {
+	background: #DB9C2E;
+}
+
+.grain.active .grain:hover {
+	background: #A6731B;
+	transition: ease .4s;
+} 
