@@ -119,12 +119,12 @@ nav ul li a {
 	float: left;
 	/* width: 60%; */
 	background: #ccc;
-	border-top: 10px solid #8A2F2F;
+	border-top: 10px solid #A6731B;
 }
 
 #panel {
-	border-top: 10px solid #8A2F2F;
-	background: #DE5E5E;
+	border-top: 10px solid #A6731B;
+	background: #DB9C2E;
 	width: 250px;
 	float: left;
 	margin-left: 5px;
@@ -144,7 +144,7 @@ h1 {
 }
 
 h2 {
-	background: #D14B4B;
+	background: #C48F31;
 	margin: -12px -12px 0 -12px;
 	text-align: center;
 	padding: 7px 0 12px 0;
@@ -161,7 +161,7 @@ h2 {
 }
  */
 h3 {
-	border-bottom: 3px solid #D14B4B;
+	border-bottom: 3px solid #8A2F2F;
 	font-weight: 100;
 	letter-spacing: 2px;
 	text-align: center;
@@ -175,10 +175,10 @@ input.normal {
 button {
 	width: 60px;
 	height: 60px;
-	background: #D14B4B;
+	background: #C48F31;
 	border: 1px solid #8A2F2F;
 	font-family: monospace;
-	color: #FEB0B0;
+	color: #fff;
 	font-weight: 100;
 	cursor: pointer;
 }
@@ -204,8 +204,8 @@ input[type="number"] {
     -moz-appearance: textfield;
 }
 
-.auto1d { 
-	background: #7A59FF; 
+.auto1d {
+	background: #7A59FF;
 	/* border-bottom: 5px solid #4E39A3; */
 }
 
@@ -213,8 +213,8 @@ input[type="number"] {
 	background: #4E39A3;
 	transition: ease .4s;
 }
-.conway { 
-	background: #D14B4B; 
+.conway {
+	background: #D14B4B;
 }
 
 .conway:hover, .conway.active {
@@ -231,19 +231,19 @@ input[type="number"] {
 	background: #BF4545;
 } */
 
-/* 
-.ant, .ant:hover { 
-	background: #3BB01A; 
+/*
+.ant, .ant:hover {
+	background: #3BB01A;
 	/* border-bottom: 5px solid #2C7517;
 }
 
-.recrystal, .recrystal:hover { 
-	background: #4BDE95; 
+.recrystal, .recrystal:hover {
+	background: #4BDE95;
 	/* border-bottom: 5px solid #39A36E;
 }
 
-.monte, .monte:hover { 
-	background: #5268BF; 
+.monte, .monte:hover {
+	background: #5268BF;
 	/* border-bottom: 5px solid #364687;
 }
 */
@@ -255,4 +255,4 @@ input[type="number"] {
 .grain.active .grain:hover {
 	background: #A6731B;
 	transition: ease .4s;
-} 
+}
