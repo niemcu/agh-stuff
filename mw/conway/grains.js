@@ -8,13 +8,13 @@ var Grains = (function() {
 		boundary: 0,
 		fillColor: '#D3AC75',
 		rows: 80,
-		cols: 130,
+		cols: 160,
 		periodic: true,
-		speed: 500,
+		speed: 80,
 		timer: null,
 		generation: 0,
 		imageMode: false,
-		nucleidsCount: 20,
+		nucleidsCount: 40,
 		emptyCells: 0,
 		neighbourhood: moore
 	};
@@ -90,11 +90,9 @@ var Grains = (function() {
 			var j = Math.floor(pos.x / opt.cellSize),
 				i = Math.floor(pos.y / opt.cellSize);
 
-			if (currentState[i][j] == 1) {
-				currentState[i][j] = 0;
-			} else {
-				currentState[i][j] = 1;
-			}
+			opt.nucleidsCount++;
+			colors[opt.nucleidsCount + 1] = '#'+Math.floor(Math.random()*16777215).toString(16);
+			currentState[i][j] = opt.nucleidsCount;
 			drawField();
 		}
 	}
@@ -131,7 +129,7 @@ var Grains = (function() {
 		processEachCell(function (i, j) {
 			var c = currentState[i][j];
 				ctx.fillStyle = colors[c];
-				ctx.fillRect(j * opt.cellSize, i * opt.cellSize, opt.cellSize, opt.cellSize);
+				ctx.fillRect(j * opt.cellSize, i * opt.cellSize, opt.cellSize +1, opt.cellSize +1);
 		});
 
 		if (opt.grid) applyGrid();
@@ -725,8 +723,8 @@ var Grains = (function() {
 		//list[currentState[k][n]]++;
 
 		list[currentState[i][l]]++;
-		list[currentState[i][n]]++;
-		//list[currentState[i][j]]++;
+		//list[currentState[i][n]]++;
+		list[currentState[i][j]]++;
 
 		list[currentState[m][l]]++;
 		list[currentState[m][j]]++;
