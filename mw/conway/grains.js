@@ -14,9 +14,14 @@ var Grains = (function() {
 		timer: null,
 		generation: 0,
 		imageMode: false,
-		nucleidsCount: 40,
+		nucleidsCount: 0,
 		emptyCells: 0,
-		neighbourhood: moore
+		neighbourhood: moore,
+		distRadius: 10,
+		showRadius: false,
+		running: false,
+		fullrandom: false,
+		randompent: true
 	};
 
 	var colors = [];
@@ -30,7 +35,6 @@ var Grains = (function() {
 		for (var i = 0; i < opt.rows; i++) {
 			currentState[i] = new Array(opt.cols).fill(0);
 		}
-		randomizeState();
 	}
 
 	function dumpCell(event) {
@@ -90,9 +94,17 @@ var Grains = (function() {
 			var j = Math.floor(pos.x / opt.cellSize),
 				i = Math.floor(pos.y / opt.cellSize);
 
-			opt.nucleidsCount++;
 			colors[opt.nucleidsCount + 1] = '#'+Math.floor(Math.random()*16777215).toString(16);
+			opt.nucleidsCount++;
 			currentState[i][j] = opt.nucleidsCount;
+
+
+			handleNucleidsChange(false);
+
+			if (opt.nucleidsCount == 0) {
+
+			}
+
 			drawField();
 		}
 	}
@@ -128,8 +140,19 @@ var Grains = (function() {
 		clearCanvas();
 		processEachCell(function (i, j) {
 			var c = currentState[i][j];
+			if (c != 0 && opt.showRadius && !opt.running) {
+				ctx.beginPath();
+				ctx.arc(j*opt.cellSize + opt.cellSize/2, i*opt.cellSize + opt.cellSize/2, opt.distRadius, 0, 2 * Math.PI, false);
+				ctx.fillStyle = 'yellow';
+				ctx.fill();
+				ctx.fillStyle = colors[c];
+			}
+			if (c == 0) {
+
+			} else {
 				ctx.fillStyle = colors[c];
 				ctx.fillRect(j * opt.cellSize, i * opt.cellSize, opt.cellSize +1, opt.cellSize +1);
+			}
 		});
 
 		if (opt.grid) applyGrid();
@@ -201,7 +224,14 @@ var Grains = (function() {
 				var c = currentState[i][j];
 				if (c == 0) {
 					emptyCells++;
-					m = opt['neighbourhood'](i, j);
+					var fun = opt['neighbourhood'];
+					if (opt.fullrandom) {
+						fun = randomNeighbourhood();
+					}
+					if (opt.randompent) {
+						fun = randomPent();
+					}
+					m = fun(i, j);
 
 					nextState[i][j] = m;
 				} else {
@@ -339,6 +369,111 @@ var Grains = (function() {
 
 	}
 
+	function randomNeighbourhood() {
+		var arr = [moore, neumann, rpent, lpent, rhex, lhex];
+ 		var n = Math.floor((Math.random() * arr.length));
+		return arr[n];
+	}
+
+	function randomPent() {
+		var arr = [rpent, lpent];
+		var n = Math.floor((Math.random() * arr.length));
+		return arr[n];
+	}
+
+	function distributeEvenly() {
+		var n = opt.nucleidsCount;
+		var i = opt.rows;
+		var j = opt.cols;
+
+		var difColumn = Math.round(j / (Math.sqrt(n)+1));
+		var difRow = Math.round(i / (Math.sqrt(n)+1));
+		var k = 1;
+		var ccol = difColumn;
+		var crow = difRow;
+
+		for (; difRow < opt.rows; difRow += crow) {
+			if (k == n+1) break;
+			var difColumn = Math.round(j / (Math.sqrt(n)+1));
+
+			console.log('ale czemu');
+			for (; difColumn < opt.cols; difColumn += ccol) {
+					console.log(difRow, difColumn);
+					currentState[difRow][difColumn] = k;
+					colors[k] = '#'+Math.floor(Math.random()*16777215).toString(16);
+					//czasem losowal sie bialy
+									if (colors[k] == '#ffffff') {
+											colors[k] = "#111111";
+									}
+									// czasem sie jakies dziwne losowaly
+									while (colors[k].length != 7) {
+										colors[k] = '#'+Math.floor(Math.random()*16777215).toString(16);
+									}
+					k++;
+					if (k == n+1) break;
+			}
+		}
+
+		// for (var k = 1; k <= n; k++) {
+		//
+		// 	console.log(difRow, difColumn);
+		// 	currentState[difRow][difColumn] = k;
+		// 	colors[k] = '#'+Math.floor(Math.random()*16777215).toString(16);
+		//
+		// 				// czasem losowal sie bialy
+		// 				if (colors[k] == '#ffffff') {
+		// 						colors[k] = "#111111";
+		// 				}
+		// 				// czasem sie jakies dziwne losowaly
+		// 				while (colors[k].length != 7) {
+		// 					colors[k] = '#'+Math.floor(Math.random()*16777215).toString(16);
+		// 				}
+		// 	difRow += difRow;
+		// 	difColumn += difColumn	;
+		// }
+	}
+
+	function distributeRadius() {
+		var r = opt.distRadius;
+
+		if (r == 0)
+			return;
+
+		var stack = [];
+
+		while(stack.length != opt.nucleidsCount) {
+			var i = Math.floor(Math.random() * opt.rows);
+			var j = Math.floor(Math.random() * opt.cols);
+			// przelec przez wszystkie juz zrobione punkty i zobacz czy nie siadles w radius ich
+			var good = true;
+			for (var p = 0; p < stack.length; p++) {
+				var pt = stack[p];
+				if (Math.sqrt((i-pt.x)*(i-pt.x) + (j-pt.y)*(j-pt.y)) < opt.distRadius) {
+					good = false;
+					break;
+				}
+			}
+			if (good) {
+				stack.push({x: i, y: j});
+			}
+		}
+
+		for (var k = 1; k <= opt.nucleidsCount; k++) {
+			var point = stack[k-1];
+			currentState[point.x][point.y] = k;
+			colors[k] = '#'+Math.floor(Math.random()*16777215).toString(16);
+
+			// czasem losowal sie bialy
+			if (colors[k] == '#ffffff') {
+				colors[k] = "#111111";
+			}
+			// czasem sie jakies dziwne losowaly
+			while (colors[k].length != 7) {
+				colors[k] = '#'+Math.floor(Math.random()*16777215).toString(16);
+			}
+		}
+	}
+
 	// why dis must be so ugly yhhhhh
 	function setupPanel() {
 		dom.cellsAmount = document.getElementById('cells-amount');
@@ -349,10 +484,21 @@ var Grains = (function() {
 
 		dom.gencnt = document.getElementById('generation-counter');
 
+		dom.manual = document.getElementById('manual');
+		dom.frandom = document.getElementById('frandom');
+		dom.evenly = document.getElementById('evenly');
+		dom.radius = document.getElementById('radius');
+
 		dom.imagelink = document.getElementById('imagelink');
 
 		dom.iterations = document.getElementById('iterations');
 		dom.iterations.value = opt.rows;
+
+		dom.nucleids = document.getElementById('nucleids');
+		dom.nucleids.value = opt.nucleidsCount;
+
+		dom.radiusval = document.getElementById('radiusval');
+		dom.radiusval.value = opt.distRadius;
 
 		dom.startBtn = document.getElementById('start');
 		dom.stopBtn = document.getElementById('stop');
@@ -370,6 +516,10 @@ var Grains = (function() {
 
 		document.getElementById('iter-plus').addEventListener('click', function () { dom.iterations.value++; handleIterChange(); }, false);
 		document.getElementById('iter-minus').addEventListener('click', function () { dom.iterations.value--; handleIterChange(); }, false);
+
+		document.getElementById('nucleids-plus').addEventListener('click', function () { dom.nucleids.value++; opt.nucleidsCount++; handleNucleidsChange(); }, false);
+		//document.getElementById('nucleids-minus').addEventListener('click', function () { dom.nucleids.value--; handleNucleidsChange(); }, false);
+		document.getElementById('radiusval-plus').addEventListener('click', function () { dom.radiusval.value++; opt.distRadius++; handleRadiusChange(); }, false);
 
 		document.getElementById('moore').addEventListener('click', function () {
 			opt.neighbourhood = moore;
@@ -399,7 +549,50 @@ var Grains = (function() {
 		// document.getElementById('glider').addEventListener('click', putGlider, false);
 		// document.getElementById('frog').addEventListener('click', putFrog, false);
 
+		dom.manual.addEventListener('click', function () {
+			clear();
+			run();
+			opt.nucleidsCount = 0;
+		});
 
+		dom.frandom.addEventListener('click', function () {
+			clear();
+			run();
+			var n = parseInt(dom.nucleids.value);
+			if (n != 0) {
+				opt.nucleidsCount = n;
+				randomizeState();
+				drawField();
+			} else {
+				console.log('nucleids cannot be 0!');
+			}
+		});
+
+		dom.evenly.addEventListener('click', function () {
+			clear();
+			run();
+			var n = parseInt(dom.nucleids.value);
+			if (n != 0) {
+				opt.nucleidsCount = n;
+				distributeEvenly();
+				drawField();
+			} else {
+				console.log('nucleids cannot be 0!');
+			}
+		});
+
+		dom.radius.addEventListener('click', function () {
+			clear();
+			run();
+			var n = parseInt(dom.nucleids.value);
+			if (n != 0) {
+				opt.nucleidsCount = n;
+				distributeRadius();
+				drawField();
+			} else {
+				console.log('nucleids cannot be 0!');
+			}
+		});
 
 		dom.cellsAmount.addEventListener('change', handleCellsChange, false);
 		dom.rule.addEventListener('change', handleRuleChange, false);
@@ -416,12 +609,14 @@ var Grains = (function() {
 		dom.startBtn.addEventListener('click', function () {
 			dom.startBtn.className = 'active-bc';
 			dom.stopBtn.className = '';
+			opt.running = true;
 			loop();
 		}, false);
 
 		dom.stopBtn.addEventListener('click', function (e) {
 			dom.startBtn.className = '';
 			dom.stopBtn.className = 'active-bc';
+			opt.running = false;
 			clearTimeout(opt.timer);
 		}, false);
 
@@ -446,6 +641,12 @@ var Grains = (function() {
 
 		function handleRuleChange() {
 			opt.speed = parseInt(dom.rule.value);
+		}
+
+		function handleRadiusChange() {
+			opt.distRadius = parseInt(dom.radiusval.value);
+			clear();
+			run();
 		}
 
 /* 		function handleImageLinkChange() {
@@ -479,6 +680,15 @@ var Grains = (function() {
 		}
 	}
 
+	function handleNucleidsChange(clearAndRun = true) {
+		dom.nucleids.value = opt.nucleidsCount;
+		opt.nucleidsCount = parseInt(dom.nucleids.value);
+
+		if (clearAndRun) {
+			clear();
+			run();
+		}
+	}
 	function setColor() {
 		var colorPairs = {
 			'gold':  '#D3AC75',
@@ -487,24 +697,24 @@ var Grains = (function() {
 			'green': '#9BE68E'
 		};
 
-		var picker = document.getElementById('color-picker');
-
-		var buttons = picker.getElementsByTagName('li');
-
-		[].forEach.call(buttons, function (el, index) {
-			el.addEventListener('click', function (event) {
-				resetClasses();
-				this.className += ' active';
-				opt.fillColor = colorPairs[this.id];
-				drawField();
-			}, false);
-		});
-
-		function resetClasses() {
-			[].forEach.call(buttons, function (el) {
-				el.className = '';
-			});
-		}
+		// var picker = document.getElementById('color-picker');
+		//
+		// var buttons = picker.getElementsByTagName('li');
+		//
+		// [].forEach.call(buttons, function (el, index) {
+		// 	el.addEventListener('click', function (event) {
+		// 		resetClasses();
+		// 		this.className += ' active';
+		// 		opt.fillColor = colorPairs[this.id];
+		// 		drawField();
+		// 	}, false);
+		// });
+		//
+		// function resetClasses() {
+		// 	[].forEach.call(buttons, function (el) {
+		// 		el.className = '';
+		// 	});
+		// }
 	}
 
 	setupPanel();

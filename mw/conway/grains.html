@@ -15,7 +15,7 @@
 					<li><a class="auto1d" href="1d.html">1D</a></li>
 					<li><a class="conway" href="conway.html">Conway</a></li>
 					<li><a class="ant" href="">Mrówa</a></li>
-					<li><a class="grain active" href="grains.html">Rozrost ziaren</a></li>
+					<li><a class="grain active" href="grains.html">Rozrost</a></li>
 					<li><a class="recrystal" href="#">Rekrystalizacja</a></li>
 					<li><a class="monte" href="#">Monte Carlo</a></li>
 				</ul>
@@ -26,6 +26,24 @@
 				</section>
 				<section id="panel" class="conway">
 					<h2>Rozrost ziaren</h2>
+					<h3>zarodki</h3>
+
+					<label>Umiejscowienie: </label>
+					<button type="button" id="manual">manual</button>
+					<button type="button" id="frandom">random</button>
+					<br/><br/>
+
+					<button type="button" id="evenly">evenly</button>
+					<button type="button" id="radius">radius</button>
+
+					<label for="nucleids">Ilość zarodków </label>
+					<input type="number" name="nucleids" id="nucleids" />
+					<button type="button" id="nucleids-plus">+</button>
+					<!--<button type="button" id="nucleids-minus">-</button>-->
+					<label for="radiusval">Promień rozłożenia:</label>
+					<input type="number" name="radiusval" id="radiusval" />
+					<button type="button" id="radiusval-plus">+</button>
+
 					<h3>przebieg</h3>
 					licznik kroków:
 					<span id="generation-counter">0</span>
@@ -37,6 +55,8 @@
 					<input type="number" name="rule" id="rule" />
 					<button type="button" id="rule-plus">+</button>
 					<button type="button" id="rule-minus">-</button>
+
+
 
 					<label for="perio">Warunki brzegowe: </label>
 					<button type="button" id="periodic" class="active-bc">P</button>
@@ -73,16 +93,16 @@
 
 					<h3>opcje wyświetlania</h3>
 
-					<label>Kolor komórek: </label>
+					<!--<label>Kolor komórek: </label>
 					<ul id="color-picker">
 						<li id="gold" class="active"></li>
 						<li id="blue"></li>
 						<li id="green"></li>
 						<li id="rose"></li>
 					</ul>
-
+-->
 					<label for="grid">Pokaż/ukryj siatkę: </label>
-					<input type="checkbox" name="grid" id="grid" checked/>
+					<input type="checkbox" name="grid" id="grid"/>
 
 				</section>
 			</section>
