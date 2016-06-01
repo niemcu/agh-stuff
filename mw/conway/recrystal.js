@@ -1,6 +1,102 @@
 // autor: ympeg
 // konwencja: wszystko camelcase
-var Grains = (function() {
+
+var Recrystal = (function () {
+
+	var opt = {};
+
+  opt.timeStep = 0;
+	opt.critRo = 4216170444886.552;
+
+	opt.rows = 80;
+	opt.cols = 160;
+
+	opt.previousRo = 0;
+
+	var state = new Array(opt.rows);
+
+	var getRo = function(time) {
+		var A = 8.671097e+13,
+				B = 9.41e+00;
+
+		time = time || opt.timeStep;
+
+		var ro = A/B + (1-A/B)* Math.exp(-B*time);
+
+		var out = ro - opt.previousRo;
+		opt.previousRo = ro;
+		return out;
+	};
+
+	function processEachCell(callback) {
+		for (var i = 0; i < opt.rows; i++) {
+			for (var j = 0; j < opt.cols; j++) {
+				// if typeof
+				callback(i, j);
+			}
+		}
+	}
+
+	var init = function (microstruct) {
+		for (var i = 0; i < opt.rows; i++) {
+			state[i] = new Array(opt.cols);
+		}
+
+		processEachCell(function (i, j) {
+			state[i][j] = {
+				id: microstruct[i][j],
+				ro: 0,
+				rec: false
+			};
+		});
+
+		console.log(state);
+
+		//
+		// for (; opt.timeStep < 0.2; opt.timeStep += 0.001) {
+		// 	console.log('ro ' + Math.round(opt.timeStep, 3), getCurrentRo().toExponential(2));
+		// }
+	};
+
+	var step = function() {
+		var addRo;
+		// oblicz ro srednie
+		var avgRo = getCurrentRo() / (opt.rows*opt.cols);
+		// dorzuc i sprawdz
+		processEachCell(function (i, j) {
+			if (isOnEdge(i, j)) {
+				addRo = avgRo * (Math.floor(Math.random() * (180-120) + 120)/100);
+			} else {
+				addRo = avgRo * (Math.floor(Math.random() * 30)/100);
+			}
+			state[i][j].ro += addRo;
+		});
+
+	};
+
+	var isOnEdge = function (i, j) {
+		return true;
+	}
+
+	var privFun = function () {
+		console.log('jestem w hcuj prywatny');
+	};
+
+	var opti = { huj: 54 };
+
+	var recrystalize = function () {
+
+	};
+
+	return {
+		init: init,
+		recrystalize: recrystalize
+	};
+})();
+
+console.log(Recrystal);
+
+var Grains = (function(Recrystal) {
 
 	var opt = {
 		cellSize: 10,
@@ -365,6 +461,9 @@ var Grains = (function() {
 
 		if (opt.emptyCells == 0) {
 			clearTimeout(opt.timer);
+			console.log('dosyc');
+			alert('Przystepujemy do rekrystalizacji!');
+			Recrystal.init(currentState);
 		}
 
 	}
@@ -396,9 +495,7 @@ var Grains = (function() {
 			if (k == n+1) break;
 			var difColumn = Math.round(j / (Math.sqrt(n)+1));
 
-			console.log('ale czemu');
 			for (; difColumn < opt.cols; difColumn += ccol) {
-					console.log(difRow, difColumn);
 					currentState[difRow][difColumn] = k;
 					colors[k] = '#'+Math.floor(Math.random()*16777215).toString(16);
 					//czasem losowal sie bialy
@@ -966,4 +1063,4 @@ var Grains = (function() {
 
 		}, false);
 	}); */
-})();
+})(Recrystal);

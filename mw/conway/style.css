@@ -222,6 +222,15 @@ input[type="number"] {
 	transition: ease .4s;
 }
 
+.recrystal  {
+	background: #278657;
+}
+
+.recrystal.active, .recrystal:hover {
+	background: #39A36E;
+	transition: ease .4s;
+}
+
 /* #content.conway {
 	border-top: 10px solid #8A2F2F;
 }
@@ -236,12 +245,9 @@ input[type="number"] {
 	background: #3BB01A;
 	/* border-bottom: 5px solid #2C7517;
 }
+*/
 
-.recrystal, .recrystal:hover {
-	background: #4BDE95;
-	/* border-bottom: 5px solid #39A36E;
-}
-
+/*
 .monte, .monte:hover {
 	background: #5268BF;
 	/* border-bottom: 5px solid #364687;
@@ -252,7 +258,7 @@ input[type="number"] {
 	background: #DB9C2E;
 }
 
-.grain.active .grain:hover {
+.grain:hover, .grain.active {
 	background: #A6731B;
 	transition: ease .4s;
 }
