@@ -7,8 +7,8 @@ var Grains = (function() {
 		grid: false,
 		boundary: 0,
 		fillColor: '#D3AC75',
-		rows: 80,
-		cols: 160,
+		rows: 20,
+		cols: 40,
 		periodic: true,
 		speed: 80,
 		timer: null,
@@ -21,9 +21,11 @@ var Grains = (function() {
 		showRadius: false,
 		running: false,
 		fullrandom: false,
-		randompent: false
+		randompent: false,
 	};
 
+	//opt.idCount = opt.rows * opt.cols;
+	
 	var colors = [];
 	colors[0] = '#FFFFFF';
 
@@ -31,10 +33,21 @@ var Grains = (function() {
 
 	var currentState = new Array(opt.rows);
 
+	var allIndexes = [];
+	
 	function setup() {
 		for (var i = 0; i < opt.rows; i++) {
 			currentState[i] = new Array(opt.cols).fill(0);
 		}
+		
+		//build array to shuffle
+		var q = 0;
+		processEachCell(function (i, j) {
+			allIndexes[q] = {};	
+			allIndexes[q].i = i;
+			allIndexes[q].j = j;
+			q++;
+		});
 	}
 
 	function dumpCell(event) {
@@ -48,23 +61,25 @@ var Grains = (function() {
 		console.log("cell: ", i, j, "id: ", num, "color: ", colors[num]);
 	}
 
+	var colors = [];
+	
 	function randomizeState() {
-		for (var k = 1; k <= opt.nucleidsCount; k++) {
-			var i = Math.floor(Math.random() * opt.rows);
-			var j = Math.floor(Math.random() * opt.cols);
-
-			currentState[i][j] = k;
+		var k = 0;
+		processEachCell(function (i, j) {
+			currentState[i][j] = {
+				id: k
+			};
 			colors[k] = '#'+Math.floor(Math.random()*16777215).toString(16);
-
-            // czasem losowal sie bialy
-            if (colors[k] == '#ffffff') {
-                colors[k] = "#111111";
-            }
-						// czasem sie jakies dziwne losowaly
-						while (colors[k].length != 7) {
-							colors[k] = '#'+Math.floor(Math.random()*16777215).toString(16);
-						}
-		}
+			// czasem losowal sie bialy
+//            if (colors[k] == '#ffffff') {
+//                colors[k] = "#111111";
+//            }
+			// czasem sie jakies dziwne losowaly
+			while (colors[k] != 7) {
+				colors[k] = '#'+Math.floor(Math.random()*16777215).toString(16);
+			}
+			k++;
+		});
 	}
 
 	function processEachCell(callback) {
@@ -109,6 +124,10 @@ var Grains = (function() {
 		}
 	}
 
+	function chooseCell() {
+		
+	}
+	
 	function clear() {
 		dom.canvasContainer.removeChild(dom.canvas);
 	}
@@ -127,6 +146,8 @@ var Grains = (function() {
 	function run() {
 		buildCanvas();
 		setup();
+		console.log('co jest');
+		randomizeState();
 
 		dom.canvas.addEventListener('click', handleClick, false);
 		dom.canvas.addEventListener('mousemove', dumpCell, false);
@@ -140,19 +161,8 @@ var Grains = (function() {
 		clearCanvas();
 		processEachCell(function (i, j) {
 			var c = currentState[i][j];
-			if (c != 0 && opt.showRadius && !opt.running) {
-				ctx.beginPath();
-				ctx.arc(j*opt.cellSize + opt.cellSize/2, i*opt.cellSize + opt.cellSize/2, opt.distRadius, 0, 2 * Math.PI, false);
-				ctx.fillStyle = 'yellow';
-				ctx.fill();
-				ctx.fillStyle = colors[c];
-			}
-			if (c == 0) {
-
-			} else {
-				ctx.fillStyle = colors[c];
-				ctx.fillRect(j * opt.cellSize, i * opt.cellSize, opt.cellSize +1, opt.cellSize +1);
-			}
+			ctx.fillStyle = colors[c.id];
+			ctx.fillRect(j * opt.cellSize, i * opt.cellSize, opt.cellSize +1, opt.cellSize +1);
 		});
 
 		if (opt.grid) applyGrid();
@@ -207,100 +217,67 @@ var Grains = (function() {
 
 		ctx.strokeStyle = "";
 	}
+	
+	function randomInt(min, max) {
+		return Math.floor(Math.random()*(max-min+1)+min);
+	}
+	
+	function getEnergy(i, j, value) {
+		value = value || currentState[i][j].id;
+		// neighbour list
+		var list = [];
+		
+		
+		return {
+			energy: 0,
+			neighbors: list
+		}
+	}
+	
+	function shuffle(array) {
+		let counter = array.length;
 
- 	function recalculate() { //console.log('recalc');
-		var nextState = new Array(opt.rows);
-		for (var i = 0; i < opt.rows; i++) {
-			nextState[i] = new Array(opt.cols).fill(0);
+		// While there are elements in the array
+		while (counter > 0) {
+			// Pick a random index
+			let index = Math.floor(Math.random() * counter);
+
+			// Decrease counter by 1
+			counter--;
+
+			// And swap the last element with it
+			let temp = array[counter];
+			array[counter] = array[index];
+			array[index] = temp;
 		}
 
-		var emptyCells = 0;
-
-		// quick and dirty ughhh
-		var x = (opt.periodic ? 0 : 1)
-
-		for (var i = x; i < opt.rows -x; i++) {
-			for (var j = x; j < opt.cols -x; j++) {
-				var c = currentState[i][j];
-				if (c == 0) {
-					emptyCells++;
-					var fun = opt['neighbourhood'];
-					if (opt.fullrandom) {
-						fun = randomNeighbourhood();
-					}
-					if (opt.randompent) {
-						fun = randomPent();
-					}
-					m = fun(i, j);
-
-					nextState[i][j] = m;
-				} else {
-					nextState[i][j] = c;
+		return array;
+	}
+	// cycle
+ 	function recalculate() { //console.log('recalc');
+		var end = allIndexes.length;
+		var indices = shuffle(allIndexes); // possible memory issue
+		for (var p = 0; p < end; p++) {
+			var cell = indices[p];
+			var e1 = getEnergy(cell.i, cell.j);
+			// jak 0 to jest w srodku, zostawic ja
+			if (e1 == 0) {
+				
+			} else {
+				var x = randomInt(0, e1.neighbors.length);
+				var e2 = getEnergy(cell.i, cell.j, e1.neighbors[x]);
+				
+				if (e2 < e1) {
+					currentState[cell.i][cell.j].id = e1.neighbors[x];
 				}
-				//console.log(m);
 			}
 		}
-		currentState = nextState;
-		updateGenerationInfo();
-		opt.emptyCells = emptyCells;
 	}
 
 	function updateGenerationInfo() {
 		opt.generation++;
 		dom.gencnt.textContent = opt.generation;
 	}
-
-	function neumann(i, j, periodic) {
-        var list = new Array(opt.nucleidsCount + 1).fill(0);
-
-		periodic = periodic || opt.periodic;
-
-		var k = i - 1,
-			l = j - 1,
-			m = i + 1,
-			n = j + 1;
-
-		if (periodic) {
-			if (k < 0) {
-				k = opt.rows - 1;
-			}
-
-			if (l < 0) {
-				l = opt.cols - 1;
-			}
-
-			if (m >= opt.rows) {
-				m = 0;
-			}
-
-			if (n >= opt.cols) {
-				n = 0;
-			}
-		}
-
-
-		list[currentState[k][j]]++;
-
-		list[currentState[i][l]]++;
-		list[currentState[i][n]]++;
-		list[currentState[i][j]]++;
-
-		list[currentState[m][j]]++;
-
-		var max1 = Math.max.apply(null, list);
-		var idx = list.indexOf(max1);
-
-		if (idx == 0) {
-			if (max1 == 5) {
-				return 0;
-			} else {
-				list.shift();
-				return list.indexOf(Math.max.apply(null, list)) + 1;
-			}
-		} else {
-			return idx;
-		}
-  }
 
 	function moore(i, j, periodic) {
 		var list = new Array(opt.nucleidsCount + 1).fill(0);
@@ -367,111 +344,6 @@ var Grains = (function() {
 			clearTimeout(opt.timer);
 		}
 
-	}
-
-	function randomNeighbourhood() {
-		var arr = [moore, neumann, rpent, lpent, rhex, lhex];
- 		var n = Math.floor((Math.random() * arr.length));
-		return arr[n];
-	}
-
-	function randomPent() {
-		var arr = [rpent, lpent];
-		var n = Math.floor((Math.random() * arr.length));
-		return arr[n];
-	}
-
-	function distributeEvenly() {
-		var n = opt.nucleidsCount;
-		var i = opt.rows;
-		var j = opt.cols;
-
-		var difColumn = Math.round(j / (Math.sqrt(n)+1));
-		var difRow = Math.round(i / (Math.sqrt(n)+1));
-		var k = 1;
-		var ccol = difColumn;
-		var crow = difRow;
-
-		for (; difRow < opt.rows; difRow += crow) {
-			if (k == n+1) break;
-			var difColumn = Math.round(j / (Math.sqrt(n)+1));
-
-			console.log('ale czemu');
-			for (; difColumn < opt.cols; difColumn += ccol) {
-					console.log(difRow, difColumn);
-					currentState[difRow][difColumn] = k;
-					colors[k] = '#'+Math.floor(Math.random()*16777215).toString(16);
-					//czasem losowal sie bialy
-									if (colors[k] == '#ffffff') {
-											colors[k] = "#111111";
-									}
-									// czasem sie jakies dziwne losowaly
-									while (colors[k].length != 7) {
-										colors[k] = '#'+Math.floor(Math.random()*16777215).toString(16);
-									}
-					k++;
-					if (k == n+1) break;
-			}
-		}
-
-		// for (var k = 1; k <= n; k++) {
-		//
-		// 	console.log(difRow, difColumn);
-		// 	currentState[difRow][difColumn] = k;
-		// 	colors[k] = '#'+Math.floor(Math.random()*16777215).toString(16);
-		//
-		// 				// czasem losowal sie bialy
-		// 				if (colors[k] == '#ffffff') {
-		// 						colors[k] = "#111111";
-		// 				}
-		// 				// czasem sie jakies dziwne losowaly
-		// 				while (colors[k].length != 7) {
-		// 					colors[k] = '#'+Math.floor(Math.random()*16777215).toString(16);
-		// 				}
-		// 	difRow += difRow;
-		// 	difColumn += difColumn	;
-		// }
-	}
-
-	function distributeRadius() {
-		var r = opt.distRadius;
-
-		if (r == 0)
-			return;
-
-		var stack = [];
-
-		while(stack.length != opt.nucleidsCount) {
-			var i = Math.floor(Math.random() * opt.rows);
-			var j = Math.floor(Math.random() * opt.cols);
-			// przelec przez wszystkie juz zrobione punkty i zobacz czy nie siadles w radius ich
-			var good = true;
-			for (var p = 0; p < stack.length; p++) {
-				var pt = stack[p];
-				if (Math.sqrt((i-pt.x)*(i-pt.x) + (j-pt.y)*(j-pt.y)) < opt.distRadius) {
-					good = false;
-					break;
-				}
-			}
-			if (good) {
-				stack.push({x: i, y: j});
-			}
-		}
-
-		for (var k = 1; k <= opt.nucleidsCount; k++) {
-			var point = stack[k-1];
-			currentState[point.x][point.y] = k;
-			colors[k] = '#'+Math.floor(Math.random()*16777215).toString(16);
-
-			// czasem losowal sie bialy
-			if (colors[k] == '#ffffff') {
-				colors[k] = "#111111";
-			}
-			// czasem sie jakies dziwne losowaly
-			while (colors[k].length != 7) {
-				colors[k] = '#'+Math.floor(Math.random()*16777215).toString(16);
-			}
-		}
 	}
 
 	// why dis must be so ugly yhhhhh
