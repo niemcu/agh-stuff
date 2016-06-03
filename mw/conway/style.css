@@ -119,12 +119,12 @@ nav ul li a {
 	float: left;
 	/* width: 60%; */
 	background: #ccc;
-	border-top: 10px solid #A6731B;
+	border-top: 10px solid #5268BF;
 }
 
 #panel {
-	border-top: 10px solid #A6731B;
-	background: #DB9C2E;
+	border-top: 10px solid #5268BF;
+	background: #5268BF;
 	width: 250px;
 	float: left;
 	margin-left: 5px;
@@ -144,7 +144,7 @@ h1 {
 }
 
 h2 {
-	background: #C48F31;
+	background: #364687;
 	margin: -12px -12px 0 -12px;
 	text-align: center;
 	padding: 7px 0 12px 0;
@@ -175,7 +175,7 @@ input.normal {
 button {
 	width: 60px;
 	height: 60px;
-	background: #C48F31;
+	background: #364687;
 	border: 1px solid #8A2F2F;
 	font-family: monospace;
 	color: #fff;
@@ -253,6 +253,14 @@ input[type="number"] {
 	/* border-bottom: 5px solid #364687;
 }
 */
+
+.monte {
+	background: #5268BF;
+}
+
+.monte:hover {
+	background: #364687;
+}
 
 .grain {
 	background: #DB9C2E;

@@ -1,6 +1,10 @@
 // autor: ympeg
 // konwencja: wszystko camelcase
 
+// TODO OGOLNIE JEST NIEZLE TYLKO CRIT RO NIE WIADOMO JAKIE NO I
+// JESZCZE BY TRZEBA BYLO DODAWAC TEZ DYSLOKACJI DO TYCH ZREKRYSTALIZOWANYCH
+// ALE PO PROSTU JUZ NIE REKRYSTALIZUJA
+
 var Recrystal = (function () {
 
 	var opt = {};
@@ -70,7 +74,7 @@ var Recrystal = (function () {
 			};
 		});
 
-		console.log(state);
+		//console.log(state);
 
 		step();
 
@@ -90,6 +94,7 @@ var Recrystal = (function () {
 		var addRo;
 		// oblicz ro srednie
 		var avgRo = getRo() / (opt.rows*opt.cols);
+
 		// dorzuc i sprawdz
 		processEachCell(function (i, j) {
 			numcells++;
@@ -103,7 +108,7 @@ var Recrystal = (function () {
 					state[i][j].ro = 0;
 					//colors[k] = '#'+Math.floor(Math.random()*16777215).toString(16);
 				} else if (state[i][j].ro > opt.critRo) {
-					console.log('mamy rekrystaliz');
+					//console.log('mamy rekrystaliz');
 					opt.nucleidsCount++;
 					var k = opt.nucleidsCount;
 					//if (k > 200) clearTimeout(opt.timer);
@@ -153,10 +158,18 @@ var Recrystal = (function () {
 		});
 		//console.log(edgycnt);
 		opt.timeStep += 0.001;
+
+		// sumuj dyslokacje
+		var roSum = 0;
+		processEachCell(function (i, j) {
+			roSum += state[i][j].ro;
+		});
+		console.log(roSum);
+
 		drawField();
 
 
-		console.log(edgycnt, notedgycnt);
+		//console.log(edgycnt, notedgycnt);
 		if (numcells == reccells) {
 			clearTimeout(opt.timer);
 			console.log('koniec zabawy');
@@ -284,7 +297,6 @@ return {
 };
 })();
 
-console.log(Recrystal);
 
 
 
@@ -338,7 +350,7 @@ var Grains = (function(Recrystal) {
 
 		var num = currentState[i][j];
 
-		console.log("cell: ", i, j, "id: ", num, "color: ", colors[num]);
+		//console.log("cell: ", i, j, "id: ", num, "color: ", colors[num]);
 	}
 
 	function randomizeState() {

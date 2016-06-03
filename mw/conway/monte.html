@@ -1,0 +1,115 @@
+<!doctype html>
+<html>
+	<head>
+		<title>Monte Carlo</title>
+		<meta charset="UTF-8">
+		<link rel="stylesheet" href="style.css" type="text/css">
+	</head>
+	<body>
+		<section id="all">
+			<header>
+				<h1>szympek's cellular automata!</h1>
+			</header>
+			<nav>
+				<ul>
+					<li><a class="auto1d" href="1d.html">1D</a></li>
+					<li><a class="conway" href="conway.html">Conway</a></li>
+					<li><a class="ant" href="">Mrówa</a></li>
+					<li><a class="grain active" href="grains.html">Rozrost</a></li>
+					<li><a class="recrystal" href="recrystal.html">Rekrystalizacja</a></li>
+					<li><a class="monte" href="monte.html">Monte Carlo</a></li>
+				</ul>
+			</nav>
+			<section id="main">
+				<section id="content" class="conway">
+					<div id="canvas-container"></div>
+				</section>
+				<section id="panel" class="conway">
+					<h2>Monte Carlo</h2>
+					<h3>zarodki</h3>
+
+					<label>Umiejscowienie: </label>
+					<button type="button" id="manual">manual</button>
+					<button type="button" id="frandom">random</button>
+					<br/><br/>
+
+					<button type="button" id="evenly">evenly</button>
+					<button type="button" id="radius">radius</button>
+
+					<label for="nucleids">Ilość zarodków </label>
+					<input type="number" name="nucleids" id="nucleids" />
+					<button type="button" id="nucleids-plus">+</button>
+					<!--<button type="button" id="nucleids-minus">-</button>-->
+					<label for="radiusval">Promień rozłożenia:</label>
+					<input type="number" name="radiusval" id="radiusval" />
+					<button type="button" id="radiusval-plus">+</button>
+
+					<h3>przebieg</h3>
+					licznik kroków:
+					<span id="generation-counter">0</span>
+					<label>Pętla: </label>
+					<button type="button" id="start">run</button>
+					<button type="button" id="stop" class="active-bc">stop</button>
+
+					<label for="rule">Czas trwania okresu (ms): </label>
+					<input type="number" name="rule" id="rule" />
+					<button type="button" id="rule-plus">+</button>
+					<button type="button" id="rule-minus">-</button>
+
+
+
+					<label for="perio">Warunki brzegowe: </label>
+					<button type="button" id="periodic" class="active-bc">P</button>
+					<button type="button" id="unperiodic">NP</button>
+
+<!-- 					<label for="imagelink">Wklej link do obrazka:</label>
+					<input class="normal" type="text" name="imagelink" id="imagelink"/> -->
+					<h3>sąsiedztwo</h3>
+
+					<button type="button" id="moore">moore</button>
+					<button type="button" id="neumann">von N.</button>
+					<br/>
+					<br/>
+					<button type="button" id="lhex">l_hex</button>
+					<button type="button" id="rhex">r_hex</button>
+					<br/>
+					<br/>
+					<button type="button" id="lpent">l_pent</button>
+					<button type="button" id="rpent">r_pent</button>
+
+
+
+					<h3>plansza</h3>
+
+					<label for="cellsAmount">Ilość kolumn: </label>
+					<input type="number" name="cells-amount" id="cells-amount" />
+					<button type="button" id="cells-plus">+</button>
+					<button type="button" id="cells-minus">-</button>
+
+					<label for="iterations">Ilość wierszy: </label>
+					<input type="number" name="iterations" id="iterations" />
+					<button type="button" id="iter-plus">+</button>
+					<button type="button" id="iter-minus">-</button>
+
+					<h3>opcje wyświetlania</h3>
+
+					<!--<label>Kolor komórek: </label>
+					<ul id="color-picker">
+						<li id="gold" class="active"></li>
+						<li id="blue"></li>
+						<li id="green"></li>
+						<li id="rose"></li>
+					</ul>
+-->
+					<label for="grid">Pokaż/ukryj siatkę: </label>
+					<input type="checkbox" name="grid" id="grid"/>
+
+				</section>
+			</section>
+			<footer>
+				created with joy and fun by @ympeg. relax, it's open-source. <a href="mailto:szniemcu@gmail.com">contact me</a>
+			</footer>
+		</section>
+		<script type="text/javascript" src="monte.js"></script>
+	</body>
+</html>
