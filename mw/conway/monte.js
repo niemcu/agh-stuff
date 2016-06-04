@@ -7,8 +7,8 @@ var Grains = (function() {
 		grid: false,
 		boundary: 0,
 		fillColor: '#D3AC75',
-		rows: 20,
-		cols: 40,
+		rows: 100,
+		cols: 150,
 		periodic: true,
 		speed: 80,
 		timer: null,
@@ -25,25 +25,25 @@ var Grains = (function() {
 	};
 
 	//opt.idCount = opt.rows * opt.cols;
-	
+
 	var colors = [];
 	colors[0] = '#FFFFFF';
 
 	var dom = {};
 
-	var currentState = new Array(opt.rows);
+	var state = new Array(opt.rows);
 
 	var allIndexes = [];
-	
+
 	function setup() {
 		for (var i = 0; i < opt.rows; i++) {
-			currentState[i] = new Array(opt.cols).fill(0);
+			state[i] = new Array(opt.cols).fill(0);
 		}
-		
+
 		//build array to shuffle
 		var q = 0;
 		processEachCell(function (i, j) {
-			allIndexes[q] = {};	
+			allIndexes[q] = {};
 			allIndexes[q].i = i;
 			allIndexes[q].j = j;
 			q++;
@@ -56,26 +56,25 @@ var Grains = (function() {
 		var j = Math.floor(pos.x / opt.cellSize),
 				i = Math.floor(pos.y / opt.cellSize);
 
-		var num = currentState[i][j];
+		var num = state[i][j];
 
 		console.log("cell: ", i, j, "id: ", num, "color: ", colors[num]);
 	}
 
 	var colors = [];
-	
+
 	function randomizeState() {
-		var k = 0;
+    var k = 0;
 		processEachCell(function (i, j) {
-			currentState[i][j] = {
-				id: k
-			};
+      //var k = randomInt(0,50);
+	    state[i][j] = k;
 			colors[k] = '#'+Math.floor(Math.random()*16777215).toString(16);
 			// czasem losowal sie bialy
 //            if (colors[k] == '#ffffff') {
 //                colors[k] = "#111111";
 //            }
 			// czasem sie jakies dziwne losowaly
-			while (colors[k] != 7) {
+			while (colors[k].length != 7) {
 				colors[k] = '#'+Math.floor(Math.random()*16777215).toString(16);
 			}
 			k++;
@@ -99,35 +98,10 @@ var Grains = (function() {
         };
 	}
 
-	function handleClick(event) {
-		var pos = getMousePos(event);
-
-		if (opt.imageMode) {
-			dom.ctx.drawImage(opt.img, pos.x, pos.y);
-			opt.imageMode = false;
-		} else {
-			var j = Math.floor(pos.x / opt.cellSize),
-				i = Math.floor(pos.y / opt.cellSize);
-
-			colors[opt.nucleidsCount + 1] = '#'+Math.floor(Math.random()*16777215).toString(16);
-			opt.nucleidsCount++;
-			currentState[i][j] = opt.nucleidsCount;
-
-
-			handleNucleidsChange(false);
-
-			if (opt.nucleidsCount == 0) {
-
-			}
-
-			drawField();
-		}
-	}
-
 	function chooseCell() {
-		
+
 	}
-	
+
 	function clear() {
 		dom.canvasContainer.removeChild(dom.canvas);
 	}
@@ -149,7 +123,7 @@ var Grains = (function() {
 		console.log('co jest');
 		randomizeState();
 
-		dom.canvas.addEventListener('click', handleClick, false);
+		//dom.canvas.addEventListener('click', handleClick, false);
 		dom.canvas.addEventListener('mousemove', dumpCell, false);
 
 		drawField();
@@ -160,8 +134,8 @@ var Grains = (function() {
 		var ctx = dom.ctx;
 		clearCanvas();
 		processEachCell(function (i, j) {
-			var c = currentState[i][j];
-			ctx.fillStyle = colors[c.id];
+			var c = state[i][j];
+			ctx.fillStyle = colors[c];
 			ctx.fillRect(j * opt.cellSize, i * opt.cellSize, opt.cellSize +1, opt.cellSize +1);
 		});
 
@@ -183,15 +157,6 @@ var Grains = (function() {
 		dom.canvas = canvas;
 		dom.canvasContainer = cnt;
 		dom.ctx = canvas.getContext('2d');
-	}
-
-	function setRule() {
-		var bin = dec2bin(opt.rule, 8),
-			len = bin.length;
-		for (var i = 0; i < len; i++) {
-			var index = dec2bin(i, 3);
-			ruleTable[index] = bin[len - i-1];
-		}
 	}
 
 	function applyGrid () {
@@ -217,23 +182,93 @@ var Grains = (function() {
 
 		ctx.strokeStyle = "";
 	}
-	
+
+	function reverseKronecker(i, j) {
+		//console.log('revers dostalem', i, j);
+		if (i == j) return 0;
+		else return 1;
+	}
+
 	function randomInt(min, max) {
 		return Math.floor(Math.random()*(max-min+1)+min);
 	}
-	
-	function getEnergy(i, j, value) {
-		value = value || currentState[i][j].id;
-		// neighbour list
-		var list = [];
-		
-		
+
+	function processNeighbor(n) {
+
+	}
+
+	function getEnergy(i, j, value, DEBUGGER) {
+		value = value || state[i][j];
+
+    var list = {};
+
+    list[value] = 1;
+		if (DEBUGGER == 667) {
+			//console.log('given value: ', value)
+		}
+    var k = i - 1,
+			l = j - 1,
+			m = i + 1,
+			n = j + 1;
+
+		if (opt.periodic) {
+			if (k < 0)
+				k = opt.rows - 1;
+			if (l < 0)
+				l = opt.cols - 1;
+			if (m >= opt.rows)
+				m = 0;
+			if (n >= opt.cols)
+				n = 0;
+		}
+
+    // dobry potwór XD chwala edycji wielu linii na raz
+		if(list[state[k][l]] == null) list[state[k][l]] = 1;
+		else list[state[k][l]]++;
+		if(list[state[k][j]] == null) list[state[k][j]] = 1;
+		else list[state[k][j]]++;
+		if(list[state[k][n]] == null) list[state[k][n]] = 1;
+		else list[state[k][n]]++;
+		if(list[state[i][l]] == null) list[state[i][l]] = 1;
+		else list[state[i][l]]++;
+		if(list[state[i][n]] == null) list[state[i][n]] = 1;
+		else list[state[i][n]]++;
+		if(list[state[m][l]] == null) list[state[m][l]] = 1;
+		else list[state[m][l]]++;
+		if(list[state[m][j]] == null) list[state[m][j]] = 1;
+		else list[state[m][j]]++;
+		if(list[state[m][n]] == null) list[state[m][n]] = 1;
+		else list[state[m][n]]++;
+
+		var energy = 0;
+
+		energy += reverseKronecker(value, state[k][l]);
+		energy += reverseKronecker(value, state[k][j]);
+		energy += reverseKronecker(value, state[k][n]);
+		energy += reverseKronecker(value, state[i][l]);
+		energy += reverseKronecker(value, state[i][n]);
+		energy += reverseKronecker(value, state[m][l]);
+		energy += reverseKronecker(value, state[m][j]);
+		energy += reverseKronecker(value, state[m][n]);
+
+		if (DEBUGGER == 667) {
+			//console.log('list: ', list )
+		}
+    var neighbors = [];
+
+    Object.keys(list).forEach(function (el) {
+      var i = parseInt(el);
+      if (i != value) {
+        neighbors.push(i);
+      }
+    });
+
 		return {
-			energy: 0,
-			neighbors: list
+			energy: energy,
+			neighbors: neighbors
 		}
 	}
-	
+
 	function shuffle(array) {
 		let counter = array.length;
 
@@ -254,95 +289,67 @@ var Grains = (function() {
 		return array;
 	}
 	// cycle
- 	function recalculate() { //console.log('recalc');
+  var globalcnt = 0;
+  var change = false;
+
+ 	function recalculate() { console.log('recalc');
+    change = false;
 		var end = allIndexes.length;
 		var indices = shuffle(allIndexes); // possible memory issue
 		for (var p = 0; p < end; p++) {
+			globalcnt++;
 			var cell = indices[p];
-			var e1 = getEnergy(cell.i, cell.j);
-			// jak 0 to jest w srodku, zostawic ja
-			if (e1 == 0) {
-				
+			if (globalcnt % 100 == 0) {
+				//console.log('poczatek');
+				var e1 = getEnergy(cell.i, cell.j, null, 667);
 			} else {
-				var x = randomInt(0, e1.neighbors.length);
-				var e2 = getEnergy(cell.i, cell.j, e1.neighbors[x]);
-				
-				if (e2 < e1) {
-					currentState[cell.i][cell.j].id = e1.neighbors[x];
+				var e1 = getEnergy(cell.i, cell.j);
+			}
+      //if (p == 667) console.log(e1, cell);
+			// jak 0 to jest w srodku, zostawic ja
+
+			if (e1.energy == 0) {
+
+			} else {
+				var x = randomInt(0, e1.neighbors.length-1);
+
+        if (globalcnt % 100 == 0) {
+					var e2 = getEnergy(cell.i, cell.j, e1.neighbors[x], 667);
+					//console.log('stara e', e1, 'nowa e', e2);
+					//console.log('koniec');
+        } else {
+					var e2 = getEnergy(cell.i, cell.j, e1.neighbors[x]);
+
+				}
+
+
+
+        if (e2.energy < e1.energy) {
+					state[cell.i][cell.j] = e1.neighbors[x];
+          change = true;
 				}
 			}
 		}
+    if (change) console.log('byla zmiana');
 	}
+
+
 
 	function updateGenerationInfo() {
 		opt.generation++;
 		dom.gencnt.textContent = opt.generation;
 	}
 
-	function moore(i, j, periodic) {
-		var list = new Array(opt.nucleidsCount + 1).fill(0);
-
-		periodic = periodic || opt.periodic;
-
-		var k = i - 1,
-			l = j - 1,
-			m = i + 1,
-			n = j + 1;
-
-		if (periodic) {
-			if (k < 0) {
-				k = opt.rows - 1;
-			}
-
-			if (l < 0) {
-				l = opt.cols - 1;
-			}
-
-			if (m >= opt.rows) {
-				m = 0;
-			}
-
-			if (n >= opt.cols) {
-				n = 0;
-			}
-		}
-
-		list[currentState[k][l]]++;
-		list[currentState[k][j]]++;
-		list[currentState[k][n]]++;
-
-		list[currentState[i][l]]++;
-		list[currentState[i][n]]++;
-		list[currentState[i][j]]++;
-
-		list[currentState[m][l]]++;
-		list[currentState[m][j]]++;
-		list[currentState[m][n]]++;
-
-		var max1 = Math.max.apply(null, list);
-		var idx = list.indexOf(max1);
-
-		if (idx == 0) {
-			if (max1 == 9) {
-				return 0;
-			} else {
-				list.shift();
-				return list.indexOf(Math.max.apply(null, list)) + 1;
-			}
-		} else {
-			return idx;
-		}
-	}
-
 	function loop() {
+    opt.timer = setTimeout(loop, opt.speed);
+
 		recalculate();
 		drawField();
 
-		opt.timer = setTimeout(loop, opt.speed);
 
-		if (opt.emptyCells == 0) {
-			clearTimeout(opt.timer);
-		}
+		// if (opt.emptyCells == 0) {
+		// 	clearTimeout(opt.timer);
+		// }
 
 	}
 
@@ -632,17 +639,17 @@ var Grains = (function() {
 		}
 
 
-		list[currentState[k][l]]++;
-		list[currentState[k][j]]++;
-		//list[currentState[k][n]]++;
+		list[state[k][l]]++;
+		list[state[k][j]]++;
+		//list[state[k][n]]++;
 
-		list[currentState[i][l]]++;
-		list[currentState[i][n]]++;
-		list[currentState[i][j]]++;
+		list[state[i][l]]++;
+		list[state[i][n]]++;
+		list[state[i][j]]++;
 
-		//list[currentState[m][l]]++;
-		list[currentState[m][j]]++;
-		list[currentState[m][n]]++;
+		//list[state[m][l]]++;
+		list[state[m][j]]++;
+		list[state[m][n]]++;
 
 		var max1 = Math.max.apply(null, list);
 		var idx = list.indexOf(max1);
@@ -688,17 +695,17 @@ var Grains = (function() {
 		}
 
 
-		//list[currentState[k][l]]++;
-		list[currentState[k][j]]++;
-		list[currentState[k][n]]++;
+		//list[state[k][l]]++;
+		list[state[k][j]]++;
+		list[state[k][n]]++;
 
-		list[currentState[i][l]]++;
-		list[currentState[i][n]]++;
-		list[currentState[i][j]]++;
+		list[state[i][l]]++;
+		list[state[i][n]]++;
+		list[state[i][j]]++;
 
-		list[currentState[m][l]]++;
-		list[currentState[m][j]]++;
-		//list[currentState[m][n]]++;
+		list[state[m][l]]++;
+		list[state[m][j]]++;
+		//list[state[m][n]]++;
 
 		var max1 = Math.max.apply(null, list);
 		var idx = list.indexOf(max1);
@@ -744,17 +751,17 @@ var Grains = (function() {
 		}
 
 
-		//list[currentState[k][l]]++;
-		list[currentState[k][j]]++;
-		list[currentState[k][n]]++;
+		//list[state[k][l]]++;
+		list[state[k][j]]++;
+		list[state[k][n]]++;
 
-		//list[currentState[i][l]]++;
-		list[currentState[i][n]]++;
-		list[currentState[i][j]]++;
+		//list[state[i][l]]++;
+		list[state[i][n]]++;
+		list[state[i][j]]++;
 
-		//list[currentState[m][l]]++;
-		list[currentState[m][j]]++;
-		list[currentState[m][n]]++;
+		//list[state[m][l]]++;
+		list[state[m][j]]++;
+		list[state[m][n]]++;
 
 		var max1 = Math.max.apply(null, list);
 		var idx = list.indexOf(max1);
@@ -800,17 +807,17 @@ var Grains = (function() {
 		}
 
 
-		list[currentState[k][l]]++;
-		list[currentState[k][j]]++;
-		//list[currentState[k][n]]++;
+		list[state[k][l]]++;
+		list[state[k][j]]++;
+		//list[state[k][n]]++;
 
-		list[currentState[i][l]]++;
-		//list[currentState[i][n]]++;
-		list[currentState[i][j]]++;
+		list[state[i][l]]++;
+		//list[state[i][n]]++;
+		list[state[i][j]]++;
 
-		list[currentState[m][l]]++;
-		list[currentState[m][j]]++;
-		//list[currentState[m][n]]++;
+		list[state[m][l]]++;
+		list[state[m][j]]++;
+		//list[state[m][n]]++;
 
 		var max1 = Math.max.apply(null, list);
 		var idx = list.indexOf(max1);
