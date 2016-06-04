@@ -154,6 +154,12 @@ h2 {
 	letter-spacing: 1px;
 }
 
+.cycle-cnt {
+	display: block;
+	font-size: 28px;
+	margin-top: 7px;
+}
+
 /* h2 span {
 	display: block;
 	font-size: 10pt;

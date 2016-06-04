@@ -26,39 +26,18 @@
 				</section>
 				<section id="panel" class="conway">
 					<h2>Monte Carlo</h2>
-					<h3>zarodki</h3>
 
-					<label>Umiejscowienie: </label>
+          <h3>przebieg</h3>
+          <p>cykl nr:</p>
+          <span id="generation-counter" class="cycle-cnt">0</span>
+          <label>Obliczenia: </label>
+          <button type="button" id="start">run</button>
+          <button type="button" id="stop" class="active-bc">stop</button>
 
-					<label for="nucleids">Ilość zarodków </label>
-					<input type="number" name="nucleids" id="nucleids" />
-					<button type="button" id="nucleids-plus">+</button>
-					<!--<button type="button" id="nucleids-minus">-</button>-->
-					<label for="radiusval">Promień rozłożenia:</label>
-					<input type="number" name="radiusval" id="radiusval" />
-					<button type="button" id="radiusval-plus">+</button>
-
-					<h3>przebieg</h3>
-					licznik kroków:
-					<span id="generation-counter">0</span>
-					<label>Pętla: </label>
-					<button type="button" id="start">run</button>
-					<button type="button" id="stop" class="active-bc">stop</button>
-
-					<label for="rule">Czas trwania okresu (ms): </label>
-					<input type="number" name="rule" id="rule" />
-					<button type="button" id="rule-plus">+</button>
-					<button type="button" id="rule-minus">-</button>
-
-
-
-					<label for="perio">Warunki brzegowe: </label>
-					<button type="button" id="periodic" class="active-bc">P</button>
-					<button type="button" id="unperiodic">NP</button>
-
-<!-- 					<label for="imagelink">Wklej link do obrazka:</label>
-					<input class="normal" type="text" name="imagelink" id="imagelink"/> -->
-					<h3>sąsiedztwo</h3>
+          <label for="rule">Czas trwania okresu (ms): </label>
+          <input type="number" name="rule" id="rule" />
+          <button type="button" id="rule-plus">+</button>
+          <button type="button" id="rule-minus">-</button>
 
 					<h3>plansza</h3>
 
@@ -71,11 +50,6 @@
 					<input type="number" name="iterations" id="iterations" />
 					<button type="button" id="iter-plus">+</button>
 					<button type="button" id="iter-minus">-</button>
-
-					<!-- <h3>opcje wyświetlania</h3>
-
-					<label for="grid">Pokaż/ukryj siatkę: </label>
-					<input type="checkbox" name="grid" id="grid"/> -->
 
 				</section>
 			</section>

@@ -4,9 +4,6 @@ var MonteCarlo = (function() {
 
 	var opt = {
 		cellSize: 10,
-		grid: false,
-		boundary: 0,
-		fillColor: '#D3AC75',
 		rows: 200,
 		cols: 250,
 		periodic: true,
@@ -250,6 +247,7 @@ var MonteCarlo = (function() {
 	}
 	// cycle
  	function recalculate() { //console.log('recalc');
+		updateCycleInfo();
 		var end = allIndexes.length;
 		var indices = shuffle(allIndexes);
 		for (var p = 0; p < end; p++) {
@@ -271,7 +269,7 @@ var MonteCarlo = (function() {
 		}
 	}
 
-	function updateGenerationInfo() {
+	function updateCycleInfo() {
 		opt.generation++;
 		dom.gencnt.textContent = opt.generation;
 	}
@@ -299,16 +297,8 @@ var MonteCarlo = (function() {
 
 		dom.gencnt = document.getElementById('generation-counter');
 
-		dom.imagelink = document.getElementById('imagelink');
-
 		dom.iterations = document.getElementById('iterations');
 		dom.iterations.value = opt.rows;
-
-		dom.nucleids = document.getElementById('nucleids');
-		dom.nucleids.value = opt.nucleidsCount;
-
-		dom.radiusval = document.getElementById('radiusval');
-		dom.radiusval.value = opt.distRadius;
 
 		dom.startBtn = document.getElementById('start');
 		dom.stopBtn = document.getElementById('stop');
@@ -324,14 +314,6 @@ var MonteCarlo = (function() {
 
 		document.getElementById('iter-plus').addEventListener('click', function () { dom.iterations.value++; handleIterChange(); }, false);
 		document.getElementById('iter-minus').addEventListener('click', function () { dom.iterations.value--; handleIterChange(); }, false);
-
-		document.getElementById('nucleids-plus').addEventListener('click', function () { dom.nucleids.value++; opt.nucleidsCount++; handleNucleidsChange(); }, false);
-		//document.getElementById('nucleids-minus').addEventListener('click', function () { dom.nucleids.value--; handleNucleidsChange(); }, false);
-		document.getElementById('radiusval-plus').addEventListener('click', function () { dom.radiusval.value++; opt.distRadius++; handleRadiusChange(); }, false);
-
-		// document.getElementById('beequeen').addEventListener('click', putBeeQueen, false);
-		// document.getElementById('glider').addEventListener('click', putGlider, false);
-		// document.getElementById('frog').addEventListener('click', putFrog, false);
 
 		dom.cellsAmount.addEventListener('change', handleCellsChange, false);
 		dom.rule.addEventListener('change', handleRuleChange, false);
@@ -353,19 +335,6 @@ var MonteCarlo = (function() {
 			clearTimeout(opt.timer);
 		}, false);
 
-		dom.periodicBtn.addEventListener('click', function () {
-			dom.periodicBtn.className = 'active-bc';
-			dom.unperiodicBtn.className = '';
-			opt.periodic = true;
-		}, false);
-
-		dom.unperiodicBtn.addEventListener('click', function (e) {
-			dom.periodicBtn.className = '';
-			dom.unperiodicBtn.className = 'active-bc';
-			opt.periodic = false;
-		}, false);
-
-
 		function handleCellsChange() {
 			opt.cols = parseInt(dom.cellsAmount.value);
 			clear();
@@ -381,30 +350,6 @@ var MonteCarlo = (function() {
 			clear();
 			run();
 		}
-
-/* 		function handleImageLinkChange() {
-			console.log('imagelki');
-			var img = new Image();
-			var ctx = dom.canvas.getContext('2d');
-			//img.setAttribute('crossOrigin', '');
-			img.src = dom.imagelink.value + '?' + new Date().getTime();
-			img.onload = function () {
-				opt.imageMode = true;
-				opt.img = img;
-				dom.canvas.addEventListener('mousemove', function (e) {
-					if (!opt.imageMode) return;
-
-					var pos = getMousePos(e);
-					clearCanvas();
-					ctx.drawImage(opt.img, pos.x, pos.y);
-					// jak to zrobic ladniej - research
-					var data = ctx.getImageData(pos.x, pos.y, img.width, img.height);
-					ctx.putImageData(data, 0, 0);
-					console.log(pos.x, pos.y);
-				}, false);
-
-			}
-		} */
 
 		function handleIterChange() {
 			opt.rows = parseInt(dom.iterations.value);
@@ -422,33 +367,6 @@ var MonteCarlo = (function() {
 			run();
 		}
 	}
-	function setColor() {
-		var colorPairs = {
-			'gold':  '#D3AC75',
-			'blue':  '#55C2ED',
-			'rose':  '#E3A3DA',
-			'green': '#9BE68E'
-		};
-
-		// var picker = document.getElementById('color-picker');
-		//
-		// var buttons = picker.getElementsByTagName('li');
-		//
-		// [].forEach.call(buttons, function (el, index) {
-		// 	el.addEventListener('click', function (event) {
-		// 		resetClasses();
-		// 		this.className += ' active';
-		// 		opt.fillColor = colorPairs[this.id];
-		// 		drawField();
-		// 	}, false);
-		// });
-		//
-		// function resetClasses() {
-		// 	[].forEach.call(buttons, function (el) {
-		// 		el.className = '';
-		// 	});
-		// }
-	}
 
 	setupPanel();
 	setColor();
@@ -458,7 +376,6 @@ var MonteCarlo = (function() {
 		run();
 	}
 
-	// use it to optimize?
 	function clearCanvas() {
 		var ctx = dom.canvas.getContext('2d');
 		ctx.clearRect(0, 0, dom.canvas.width, dom.canvas.height);
