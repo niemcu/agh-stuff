@@ -16,7 +16,6 @@ var MonteCarlo = (function() {
 		imageMode: false,
 		nucleidsCount: 0,
 		emptyCells: 0,
-		neighbourhood: moore,
 		distRadius: 10,
 		showRadius: false,
 		running: false,
@@ -96,10 +95,6 @@ var MonteCarlo = (function() {
         };
 	}
 
-	function chooseCell() {
-
-	}
-
 	function clear() {
 		dom.canvasContainer.removeChild(dom.canvas);
 	}
@@ -157,30 +152,6 @@ var MonteCarlo = (function() {
 		dom.ctx = canvas.getContext('2d');
 	}
 
-	function applyGrid () {
-		var ctx = dom.ctx,
-			  w = dom.canvas.width,
-			  h = dom.canvas.height,
-			  i = 0,
-			  max = Math.max(w, h);
-
-		ctx.strokeStyle = "#888";
-
-		for (; i < max; i += opt.cellSize) {
-			ctx.beginPath();
-			ctx.moveTo(i, 0);
-			ctx.lineTo(i, h);
-			ctx.stroke();
-
-			ctx.beginPath();
-			ctx.moveTo(0, i);
-			ctx.lineTo(w, i);
-			ctx.stroke();
-		}
-
-		ctx.strokeStyle = "";
-	}
-
 	function reverseKronecker(i, j) {
 		//console.log('revers dostalem', i, j);
 		if (i == j) return 0;
@@ -189,10 +160,6 @@ var MonteCarlo = (function() {
 
 	function randomInt(min, max) {
 		return Math.floor(Math.random()*(max-min+1)+min);
-	}
-
-	function processNeighbor(n) {
-
 	}
 
 	function getEnergy(i, j, value) {
@@ -282,10 +249,7 @@ var MonteCarlo = (function() {
 		return array;
 	}
 	// cycle
-  var change = false;
-
  	function recalculate() { //console.log('recalc');
-    change = false;
 		var end = allIndexes.length;
 		var indices = shuffle(allIndexes);
 		for (var p = 0; p < end; p++) {
@@ -305,10 +269,7 @@ var MonteCarlo = (function() {
 				}
 			}
 		}
-    if (change) console.log('byla zmiana');
 	}
-
-
 
 	function updateGenerationInfo() {
 		opt.generation++;
@@ -338,11 +299,6 @@ var MonteCarlo = (function() {
 
 		dom.gencnt = document.getElementById('generation-counter');
 
-		dom.manual = document.getElementById('manual');
-		dom.frandom = document.getElementById('frandom');
-		dom.evenly = document.getElementById('evenly');
-		dom.radius = document.getElementById('radius');
-
 		dom.imagelink = document.getElementById('imagelink');
 
 		dom.iterations = document.getElementById('iterations');
@@ -360,8 +316,6 @@ var MonteCarlo = (function() {
 		dom.periodicBtn   = document.getElementById('periodic');
 		dom.unperiodicBtn = document.getElementById('unperiodic');
 
-		dom.grid = document.getElementById('grid');
-
 		document.getElementById('cells-plus').addEventListener('click', function () { dom.cellsAmount.value++; handleCellsChange(); }, false);
 		document.getElementById('cells-minus').addEventListener('click', function () { dom.cellsAmount.value--; handleCellsChange(); }, false);
 
@@ -375,90 +329,15 @@ var MonteCarlo = (function() {
 		//document.getElementById('nucleids-minus').addEventListener('click', function () { dom.nucleids.value--; handleNucleidsChange(); }, false);
 		document.getElementById('radiusval-plus').addEventListener('click', function () { dom.radiusval.value++; opt.distRadius++; handleRadiusChange(); }, false);
 
-		document.getElementById('moore').addEventListener('click', function () {
-			opt.neighbourhood = moore;
-		}, false);
-
-		document.getElementById('neumann').addEventListener('click', function () {
-			opt.neighbourhood = neumann;
-		}, false);
-
-		document.getElementById('lhex').addEventListener('click', function () {
-			opt.neighbourhood = lhex;
-		}, false);
-
-		document.getElementById('rhex').addEventListener('click', function () {
-			opt.neighbourhood = rhex;
-		}, false);
-
-		document.getElementById('lpent').addEventListener('click', function () {
-			opt.neighbourhood = lpent;
-		}, false);
-
-		document.getElementById('rpent').addEventListener('click', function () {
-			opt.neighbourhood = rpent;
-		}, false);
-
 		// document.getElementById('beequeen').addEventListener('click', putBeeQueen, false);
 		// document.getElementById('glider').addEventListener('click', putGlider, false);
 		// document.getElementById('frog').addEventListener('click', putFrog, false);
-
-		dom.manual.addEventListener('click', function () {
-			clear();
-			run();
-			opt.nucleidsCount = 0;
-		});
-
-		dom.frandom.addEventListener('click', function () {
-			clear();
-			run();
-			var n = parseInt(dom.nucleids.value);
-			if (n != 0) {
-				opt.nucleidsCount = n;
-				randomizeState();
-				drawField();
-			} else {
-				console.log('nucleids cannot be 0!');
-			}
-		});
-
-		dom.evenly.addEventListener('click', function () {
-			clear();
-			run();
-			var n = parseInt(dom.nucleids.value);
-			if (n != 0) {
-				opt.nucleidsCount = n;
-				distributeEvenly();
-				drawField();
-			} else {
-				console.log('nucleids cannot be 0!');
-			}
-		});
-
-		dom.radius.addEventListener('click', function () {
-			clear();
-			run();
-			var n = parseInt(dom.nucleids.value);
-			if (n != 0) {
-				opt.nucleidsCount = n;
-				distributeRadius();
-				drawField();
-			} else {
-				console.log('nucleids cannot be 0!');
-			}
-		});
 
 		dom.cellsAmount.addEventListener('change', handleCellsChange, false);
 		dom.rule.addEventListener('change', handleRuleChange, false);
 		dom.iterations.addEventListener('change', handleIterChange, false);
 
 		// dom.imagelink.addEventListener('change', handleImageLinkChange, false);
-
-		dom.grid.addEventListener('change', function () {
-			dom.grid.checked = opt.grid = !opt.grid;
-			clear();
-			run();
-		}, false);
 
 		dom.startBtn.addEventListener('click', function () {
 			dom.startBtn.className = 'active-bc';
