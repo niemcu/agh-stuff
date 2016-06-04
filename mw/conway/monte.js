@@ -1,6 +1,6 @@
 // autor: ympeg
 // konwencja: wszystko camelcase
-var Grains = (function() {
+var MonteCarlo = (function() {
 
 	var opt = {
 		cellSize: 10,
@@ -20,8 +20,6 @@ var Grains = (function() {
 		distRadius: 10,
 		showRadius: false,
 		running: false,
-		fullrandom: false,
-		randompent: false,
 	};
 
 	//opt.idCount = opt.rows * opt.cols;
@@ -197,15 +195,13 @@ var Grains = (function() {
 
 	}
 
-	function getEnergy(i, j, value, DEBUGGER) {
+	function getEnergy(i, j, value) {
 		value = value || state[i][j];
 
     var list = {};
 
     list[value] = 1;
-		if (DEBUGGER == 667) {
-			//console.log('given value: ', value)
-		}
+
     var k = i - 1,
 			l = j - 1,
 			m = i + 1,
@@ -251,9 +247,6 @@ var Grains = (function() {
 		energy += reverseKronecker(value, state[m][j]);
 		energy += reverseKronecker(value, state[m][n]);
 
-		if (DEBUGGER == 667) {
-			//console.log('list: ', list )
-		}
     var neighbors = [];
 
     Object.keys(list).forEach(function (el) {
@@ -289,40 +282,22 @@ var Grains = (function() {
 		return array;
 	}
 	// cycle
-  var globalcnt = 0;
   var change = false;
 
- 	function recalculate() { console.log('recalc');
+ 	function recalculate() { //console.log('recalc');
     change = false;
 		var end = allIndexes.length;
-		var indices = shuffle(allIndexes); // possible memory issue
+		var indices = shuffle(allIndexes);
 		for (var p = 0; p < end; p++) {
-			globalcnt++;
 			var cell = indices[p];
-			if (globalcnt % 100 == 0) {
-				//console.log('poczatek');
-				var e1 = getEnergy(cell.i, cell.j, null, 667);
-			} else {
-				var e1 = getEnergy(cell.i, cell.j);
-			}
-      //if (p == 667) console.log(e1, cell);
-			// jak 0 to jest w srodku, zostawic ja
 
+			var e1 = getEnergy(cell.i, cell.j);
+			// jak 0 to jest w srodku, zostawic ja
 			if (e1.energy == 0) {
 
 			} else {
 				var x = randomInt(0, e1.neighbors.length-1);
-
-        if (globalcnt % 100 == 0) {
-					var e2 = getEnergy(cell.i, cell.j, e1.neighbors[x], 667);
-					//console.log('stara e', e1, 'nowa e', e2);
-					//console.log('koniec');
-        } else {
-					var e2 = getEnergy(cell.i, cell.j, e1.neighbors[x]);
-
-				}
-
-
+				var e2 = getEnergy(cell.i, cell.j, e1.neighbors[x]);
 
         if (e2.energy <= e1.energy) {
 					state[cell.i][cell.j] = e1.neighbors[x];
@@ -609,240 +584,4 @@ var Grains = (function() {
 		var ctx = dom.canvas.getContext('2d');
 		ctx.clearRect(0, 0, dom.canvas.width, dom.canvas.height);
 	}
-
-	function lhex(i, j, periodic) {
-		var list = new Array(opt.nucleidsCount + 1).fill(0);
-
-		periodic = periodic || opt.periodic;
-
-		var k = i - 1,
-			l = j - 1,
-			m = i + 1,
-			n = j + 1;
-
-		if (periodic) {
-			if (k < 0) {
-				k = opt.rows - 1;
-			}
-
-			if (l < 0) {
-				l = opt.cols - 1;
-			}
-
-			if (m >= opt.rows) {
-				m = 0;
-			}
-
-			if (n >= opt.cols) {
-				n = 0;
-			}
-		}
-
-
-		list[state[k][l]]++;
-		list[state[k][j]]++;
-		//list[state[k][n]]++;
-
-		list[state[i][l]]++;
-		list[state[i][n]]++;
-		list[state[i][j]]++;
-
-		//list[state[m][l]]++;
-		list[state[m][j]]++;
-		list[state[m][n]]++;
-
-		var max1 = Math.max.apply(null, list);
-		var idx = list.indexOf(max1);
-
-		if (idx == 0) {
-			if (max1 == 7) {
-				return 0;
-			} else {
-				list.shift();
-				return list.indexOf(Math.max.apply(null, list)) + 1;
-			}
-		} else {
-			return idx;
-		}
-	}
-
-	function rhex(i, j, periodic) {
-		var list = new Array(opt.nucleidsCount + 1).fill(0);
-
-		periodic = periodic || opt.periodic;
-
-		var k = i - 1,
-			l = j - 1,
-			m = i + 1,
-			n = j + 1;
-
-		if (periodic) {
-			if (k < 0) {
-				k = opt.rows - 1;
-			}
-
-			if (l < 0) {
-				l = opt.cols - 1;
-			}
-
-			if (m >= opt.rows) {
-				m = 0;
-			}
-
-			if (n >= opt.cols) {
-				n = 0;
-			}
-		}
-
-
-		//list[state[k][l]]++;
-		list[state[k][j]]++;
-		list[state[k][n]]++;
-
-		list[state[i][l]]++;
-		list[state[i][n]]++;
-		list[state[i][j]]++;
-
-		list[state[m][l]]++;
-		list[state[m][j]]++;
-		//list[state[m][n]]++;
-
-		var max1 = Math.max.apply(null, list);
-		var idx = list.indexOf(max1);
-
-		if (idx == 0) {
-			if (max1 == 7) {
-				return 0;
-			} else {
-				list.shift();
-				return list.indexOf(Math.max.apply(null, list)) + 1;
-			}
-		} else {
-			return idx;
-		}
-	}
-
-	function lpent(i, j, periodic) {
-		var list = new Array(opt.nucleidsCount + 1).fill(0);
-
-		periodic = periodic || opt.periodic;
-
-		var k = i - 1,
-			l = j - 1,
-			m = i + 1,
-			n = j + 1;
-
-		if (periodic) {
-			if (k < 0) {
-				k = opt.rows - 1;
-			}
-
-			if (l < 0) {
-				l = opt.cols - 1;
-			}
-
-			if (m >= opt.rows) {
-				m = 0;
-			}
-
-			if (n >= opt.cols) {
-				n = 0;
-			}
-		}
-
-
-		//list[state[k][l]]++;
-		list[state[k][j]]++;
-		list[state[k][n]]++;
-
-		//list[state[i][l]]++;
-		list[state[i][n]]++;
-		list[state[i][j]]++;
-
-		//list[state[m][l]]++;
-		list[state[m][j]]++;
-		list[state[m][n]]++;
-
-		var max1 = Math.max.apply(null, list);
-		var idx = list.indexOf(max1);
-
-		if (idx == 0) {
-			if (max1 == 6) {
-				return 0;
-			} else {
-				list.shift();
-				return list.indexOf(Math.max.apply(null, list)) + 1;
-			}
-		} else {
-			return idx;
-		}
-	}
-
-	function rpent(i, j, periodic) {
-		var list = new Array(opt.nucleidsCount + 1).fill(0);
-
-		periodic = periodic || opt.periodic;
-
-		var k = i - 1,
-			l = j - 1,
-			m = i + 1,
-			n = j + 1;
-
-		if (periodic) {
-			if (k < 0) {
-				k = opt.rows - 1;
-			}
-
-			if (l < 0) {
-				l = opt.cols - 1;
-			}
-
-			if (m >= opt.rows) {
-				m = 0;
-			}
-
-			if (n >= opt.cols) {
-				n = 0;
-			}
-		}
-
-
-		list[state[k][l]]++;
-		list[state[k][j]]++;
-		//list[state[k][n]]++;
-
-		list[state[i][l]]++;
-		//list[state[i][n]]++;
-		list[state[i][j]]++;
-
-		list[state[m][l]]++;
-		list[state[m][j]]++;
-		//list[state[m][n]]++;
-
-		var max1 = Math.max.apply(null, list);
-		var idx = list.indexOf(max1);
-
-		if (idx == 0) {
-			if (max1 == 6) {
-				return 0;
-			} else {
-				list.shift();
-				return list.indexOf(Math.max.apply(null, list)) + 1;
-			}
-		} else {
-			return idx;
-		}
-	}
-
-	/*
-	document.addEventListener('DOMContentLoaded', function() {
-
-		init();
-
-		document.getElementById('cells-apply').addEventListener('click', function () {
-			var num = document.getElementById('amount').value;
-			init(num);
-
-		}, false);
-	}); */
 })();
