@@ -3,25 +3,18 @@
 var MonteCarlo = (function() {
 
 	var opt = {
-		cellSize: 10,
+		cellSize: 10, //overwritten in buildCanvas()
 		rows: 200,
 		cols: 250,
 		periodic: true,
 		speed: 80,
 		timer: null,
 		generation: 0,
-		imageMode: false,
 		nucleidsCount: 0,
-		emptyCells: 0,
-		distRadius: 10,
-		showRadius: false,
 		running: false,
 	};
 
-	//opt.idCount = opt.rows * opt.cols;
-
 	var colors = [];
-	colors[0] = '#FFFFFF';
 
 	var dom = {};
 
@@ -33,8 +26,7 @@ var MonteCarlo = (function() {
 		for (var i = 0; i < opt.rows; i++) {
 			state[i] = new Array(opt.cols).fill(0);
 		}
-
-		//build array to shuffle
+		// array to shuffle
 		var q = 0;
 		processEachCell(function (i, j) {
 			allIndexes[q] = {};
@@ -49,7 +41,6 @@ var MonteCarlo = (function() {
 
 		var j = Math.floor(pos.x / opt.cellSize),
 				i = Math.floor(pos.y / opt.cellSize);
-
 		var num = state[i][j];
 
 		console.log("cell: ", i, j, "id: ", num, "color: ", colors[num]);
@@ -60,14 +51,8 @@ var MonteCarlo = (function() {
 	function randomizeState() {
     var k = 0;
 		processEachCell(function (i, j) {
-      //var k = randomInt(0,50);
 	    state[i][j] = k;
 			colors[k] = '#'+Math.floor(Math.random()*16777215).toString(16);
-			// czasem losowal sie bialy
-//            if (colors[k] == '#ffffff') {
-//                colors[k] = "#111111";
-//            }
-			// czasem sie jakies dziwne losowaly
 			while (colors[k].length != 7) {
 				colors[k] = '#'+Math.floor(Math.random()*16777215).toString(16);
 			}
@@ -228,21 +213,17 @@ var MonteCarlo = (function() {
 
 	function shuffle(array) {
 		let counter = array.length;
-
 		// While there are elements in the array
 		while (counter > 0) {
 			// Pick a random index
 			let index = Math.floor(Math.random() * counter);
-
 			// Decrease counter by 1
 			counter--;
-
 			// And swap the last element with it
 			let temp = array[counter];
 			array[counter] = array[index];
 			array[index] = temp;
 		}
-
 		return array;
 	}
 	// cycle
@@ -279,12 +260,6 @@ var MonteCarlo = (function() {
 
 		recalculate();
 		drawField();
-
-
-		// if (opt.emptyCells == 0) {
-		// 	clearTimeout(opt.timer);
-		// }
-
 	}
 
 	// why dis must be so ugly yhhhhh
@@ -358,18 +333,7 @@ var MonteCarlo = (function() {
 		}
 	}
 
-	function handleNucleidsChange(clearAndRun = true) {
-		dom.nucleids.value = opt.nucleidsCount;
-		opt.nucleidsCount = parseInt(dom.nucleids.value);
-
-		if (clearAndRun) {
-			clear();
-			run();
-		}
-	}
-
 	setupPanel();
-	setColor();
 
 	window.onresize = function () {
 		clear();
