@@ -7,8 +7,8 @@ var Grains = (function() {
 		grid: false,
 		boundary: 0,
 		fillColor: '#D3AC75',
-		rows: 100,
-		cols: 150,
+		rows: 200,
+		cols: 250,
 		periodic: true,
 		speed: 80,
 		timer: null,
@@ -324,7 +324,7 @@ var Grains = (function() {
 
 
 
-        if (e2.energy < e1.energy) {
+        if (e2.energy <= e1.energy) {
 					state[cell.i][cell.j] = e1.neighbors[x];
           change = true;
 				}
